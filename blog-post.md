@@ -10,9 +10,51 @@
 
 If you find yourself typing the same prompt across conversations — a weekly report format, a code review checklist, a data analysis pipeline — you've already felt the problem that skills solve. Agent Skills are folders of instructions that package repeated workflows, specialized knowledge, or new capabilities for your AI agent. Instead of copying and pasting lengthy prompts every session, you write them once as a skill and reuse them across every conversation.
 
+![what-ara-agent-skills.png](resources/what-ara-agent-skills.png)
+
 But skills go far beyond "saved prompts." They're an **open standard** originally created by Anthropic and now governed as a cross-platform specification at [agentskills.io](https://agentskills.io). On December 18, 2025, Anthropic released Agent Skills as an open standard, publishing the specification and SDK for any AI platform to adopt. This means a skill you build for Claude works identically in OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, VS Code, and over 20 other platforms that have adopted the standard.
 
 The simplest way to think about it: **MCP gives your agent access to external tools and data. Skills teach your agent *what to do* with those tools and data.**
+
+```mermaid
+flowchart TD
+    subgraph Filesystem["Filesystem"]
+        SK1["Skill"]
+        SK2["Skill"]
+        SK3["Skill"]
+    end
+
+    subgraph Agent["Agent"]
+        LLM["LLM"]
+        Tools["Tools"]
+        LLM <--> Tools
+    end
+
+    subgraph MCP["MCP Servers"]
+        M1["MCP Server 1"]
+        M2["MCP Server 2"]
+        M3["MCP Server 3"]
+    end
+
+    Filesystem -- "Instructions &\nDomain Knowledge" --> Agent
+    Agent <-- "External Tools\n& Data" --> MCP
+    Agent --> Sub1["Subagent"]
+    Agent --> Sub2["Subagent"]
+    Agent --> Sub3["Subagent"]
+
+    style Filesystem fill:#f9f9f9,stroke:#ccc
+    style Agent fill:#fef3e8,stroke:#e8c9a0
+    style MCP fill:#e8f4f0,stroke:#a0d4c4
+    style LLM fill:#d4a574,stroke:#b8864e,color:#fff
+    style Tools fill:#e8ddd0,stroke:#c4b8a8
+```
+
+- **Filesystem** (left) — Skills that provide instructions and domain knowledge to the agent
+- **Agent** (center) — Contains the LLM and Tools working together
+- **MCP Servers** (right) — External tools and data connections
+- **Subagents** (bottom) — Spawned by the main agent for parallel/specialized work
+
+The diagram shows the key relationship: Skills flow *into* the agent as knowledge, MCP connects *bidirectionally* for external capabilities, and Subagents are dispatched *from* the agent. This visually reinforces the point: **MCP gives your agent access to external tools and data. Skills teach your agent *what to do* with those tools and data.**
 
 ## Why Skills Matter: From Prompts to Packages
 
@@ -469,6 +511,4 @@ Whether you're automating a weekly report, encoding your team's code review proc
 - Agent Skills Open Standard Repository: https://github.com/agentskills/agentskills
 - OpenAI Codex Skills Documentation: https://developers.openai.com/codex/skills/
 - VS Code Agent Skills: https://code.visualstudio.com/docs/copilot/customization/agent-skills
-- Anthropic Makes Agent Skills an Open Standard (SiliconANGLE): https://siliconangle.com/2025/12/18/anthropic-makes-agent-skills-open-standard/
-- Agent Skills: Anthropic's Next Bid to Define AI Standards (The New Stack): https://thenewstack.io/agent-skills-anthropics-next-bid-to-define-ai-standards/
-- DeepLearning.AI Agent Skills Course (source material)
+
