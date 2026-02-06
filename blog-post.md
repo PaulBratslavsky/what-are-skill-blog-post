@@ -1,24 +1,22 @@
 **TL;DR**
 
-- Agent Skills are an open standard for packaging reusable workflows, domain expertise, and new capabilities into portable folders that any AI agent can discover and use
-- Skills use progressive disclosure to protect the context window — only loading the name and description at startup, then the full instructions and resources on demand
-- The standard is supported by 26+ platforms including Claude, Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, and VS Code
-- Building a skill is straightforward: create a folder with a `SKILL.md` file containing YAML frontmatter (name + description) and markdown instructions, plus optional `scripts/`, `references/`, and `assets/` subdirectories
-- Skills are composable — combine custom skills with built-in ones and MCP servers to create powerful, predictable workflows
+- Agent Skills are an open standard for packaging reusable workflows, domain expertise, and new capabilities into portable folders that any AI agent can discover and use — think of them as "saved prompts" on steroids
+- Skills use a three-tier progressive disclosure model to protect the context window: only the name and description load at startup (~30-50 tokens per skill), the full SKILL.md loads when triggered, and reference files load only when needed during execution
+- Originally created by Anthropic, skills are now an open standard at agentskills.io, adopted by 26+ platforms including Claude, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, and VS Code
+- A skill is just a folder with a `SKILL.md` file (YAML frontmatter + markdown instructions) plus optional `scripts/`, `references/`, and `assets/` directories — you can build one in minutes
+- Skills are composable: combine custom skills with built-in document skills and MCP servers to build complex, predictable workflows that produce consistent output every time
 
 ## What Are Agent Skills?
 
-If you've ever found yourself pasting the same prompt into Claude over and over — a weekly report format, a code review checklist, a data analysis workflow — you've already felt the problem that skills solve.
+If you find yourself typing the same prompt across conversations — a weekly report format, a code review checklist, a data analysis pipeline — you've already felt the problem that skills solve. Agent Skills are folders of instructions that package repeated workflows, specialized knowledge, or new capabilities for your AI agent. Instead of copying and pasting lengthy prompts every session, you write them once as a skill and reuse them across every conversation.
 
-**Agent Skills are folders of instructions** that package repeated workflows, specialized knowledge, or new capabilities for your AI agent. Instead of copying and pasting lengthy prompts every session, you write them once as a skill and reuse them forever.
+But skills go far beyond "saved prompts." They're an **open standard** originally created by Anthropic and now governed as a cross-platform specification at [agentskills.io](https://agentskills.io). On December 18, 2025, Anthropic released Agent Skills as an open standard, publishing the specification and SDK for any AI platform to adopt. This means a skill you build for Claude works identically in OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, VS Code, and over 20 other platforms that have adopted the standard.
 
-But skills aren't just "saved prompts." They're an **open standard** originally created by Anthropic and now governed as a cross-platform specification at [agentskills.io](https://agentskills.io). This means a skill you build for Claude works identically in OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, and over 20 other platforms.
+The simplest way to think about it: **MCP gives your agent access to external tools and data. Skills teach your agent *what to do* with those tools and data.**
 
-Think of it this way: **MCP gives your agent access to external tools and data. Skills teach your agent *what to do* with those tools and data.**
+## Why Skills Matter: From Prompts to Packages
 
-## Why Skills Matter
-
-### The Problem with Raw Prompts
+### The Prompt Repetition Problem
 
 Consider a content creator who publishes blog posts every week. Without skills, every conversation starts the same way:
 
@@ -28,29 +26,31 @@ Consider a content creator who publishes blog posts every week. Without skills, 
 4. Paste or describe the topic and source material
 5. Hope the output actually follows all those rules consistently
 
-This approach has three major issues:
+Now multiply that across a team of five writers, each with their own slightly different version of those instructions. The output quality varies from session to session and person to person.
 
-- **Context window pollution** — Every piece of instruction consumes tokens, leaving less room for actual content creation
-- **No portability** — The workflow lives in your clipboard, not in a shareable, versioned artifact
-- **No consistency** — Different team members will paste different versions of the instructions, and the output quality varies from session to session
+This approach has three fundamental issues:
 
-### What Skills Solve
+- **Context window pollution** — Every piece of instruction you paste consumes tokens that could be used for actual content. The more instructions you front-load, the faster your context fills up and the higher the likelihood of degradation in response quality
+- **No portability** — Your workflow lives in your clipboard or a shared doc somewhere, not in a versioned, shareable artifact that can be installed and used consistently
+- **No consistency** — Without a standardized format, different people will interpret and paste those instructions differently, and you can never guarantee the agent follows every rule every time
 
-Skills address all three problems by introducing:
+### How Skills Fix This
 
-- **Progressive disclosure** — Only the skill name and description are loaded at startup. The full instructions load only when the skill is triggered. Referenced files and scripts load only when needed during execution
-- **Portability** — A skill is a folder. Share it via zip file, Git repository, or marketplace. It works across 26+ platforms
-- **Repeatability** — The same instructions execute the same way every time, for every team member
+Skills address all three problems:
+
+- **Progressive disclosure** — Only the skill's name and description are loaded at startup (roughly 30-50 tokens per skill). The full instructions load only when the skill is triggered. Referenced files, scripts, and assets load only when needed during execution. You can have hundreds of skills installed without any impact on performance
+- **Portability** — A skill is a folder. Share it as a zip file, push it to a Git repository, or publish it to a marketplace. Since it's an open standard, it works across Claude, Codex, Gemini CLI, and every other platform that supports the spec
+- **Repeatability** — The same instructions execute the same way every time, for every team member, across every platform. In a non-deterministic system where you can never fully predict the model's output, skills provide the structure to make workflows as predictable as possible
 
 ```mermaid
 flowchart TD
-    A[Agent Starts] --> B[Load skill metadata<br/>~100 tokens per skill]
-    B --> C{User query<br/>matches skill?}
+    A[Agent Starts] --> B["Load skill metadata\n~30-50 tokens per skill"]
+    B --> C{User query\nmatches skill?}
     C -->|No| D[Normal conversation]
-    C -->|Yes| E[Load SKILL.md<br/>full instructions]
-    E --> F{References<br/>needed?}
+    C -->|Yes| E["Load SKILL.md\nfull instructions"]
+    E --> F{Additional files\nneeded?}
     F -->|No| G[Execute workflow]
-    F -->|Yes| H[Load specific files<br/>scripts, assets]
+    F -->|Yes| H["Load references,\nscripts, assets"]
     H --> G
 
     style B fill:#e1f5fe
@@ -58,59 +58,18 @@ flowchart TD
     style H fill:#fce4ec
 ```
 
-This three-tier loading model means you can have **hundreds of skills installed** without any performance impact — the agent only pays the token cost for skills it actually uses.
+Anthropic frames the context window as a **public good** — the more data you add, the more tokens you consume, the faster it fills, and the greater the risk of context degradation. Progressive disclosure is what makes skills fundamentally different from just pasting a big prompt. Skills are intentional about what information goes into the context window and what stays on disk until it's actually needed.
 
-## The Agent Skills Ecosystem
-
-Skills don't exist in isolation. They're one piece of a larger agent architecture:
-
-```mermaid
-flowchart LR
-    subgraph External["External Systems"]
-        MCP[MCP Servers<br/>Tools & Data]
-    end
-
-    subgraph Agent["Agent Runtime"]
-        Main[Main Agent]
-        Sub1[Subagent 1]
-        Sub2[Subagent 2]
-    end
-
-    subgraph Knowledge["Skills"]
-        S1[Custom Skills<br/>Domain expertise]
-        S2[Built-in Skills<br/>Documents, PDFs]
-        S3[Shared Skills<br/>Team workflows]
-    end
-
-    MCP --> Main
-    Main --> Sub1
-    Main --> Sub2
-    S1 --> Main
-    S2 --> Main
-    S1 --> Sub1
-    S3 --> Sub2
-```
-
-| Component | What It Does | When to Use |
-|-----------|-------------|-------------|
-| **Prompts** | The atomic unit of communication | Single, one-off instructions |
-| **Skills** | Packaged workflows with domain expertise | Repeatable tasks, team-wide processes |
-| **MCP** | Connects agents to external tools and data | Database access, APIs, file systems |
-| **Subagents** | Isolated execution with their own context | Parallel tasks, specialized analysis |
-| **Tools** | Low-level capabilities (bash, filesystem) | The building blocks that power everything |
-
-The analogy is simple: **tools are the hammer and saw, skills are the blueprint for building the bookshelf.** Skills can reference MCP servers for data, dispatch subagents for parallel execution, and invoke scripts — all while keeping the context window clean.
-
-## How Skills Work Under the Hood
+## The Anatomy of a Skill
 
 Every skill follows the same structure, defined by the [Agent Skills Specification](https://agentskills.io/specification):
 
 ```
 my-skill/
-├── SKILL.md              # Required — instructions + YAML frontmatter
-├── scripts/              # Optional — executable code
+├── SKILL.md              # Required — YAML frontmatter + markdown instructions
+├── scripts/              # Optional — executable code (Python, Bash, JS)
 ├── references/           # Optional — additional documentation
-└── assets/               # Optional — templates, images, data files
+└── assets/               # Optional — templates, images, logos, data files
 ```
 
 ### The SKILL.md File
@@ -129,6 +88,10 @@ description: >-
 ---
 ```
 
+The `name` and `description` are the only two required fields. The name must be 1-64 characters, lowercase with hyphens, and should match the folder name. The description (up to 1,024 characters) is mission critical — it's how the agent detects when to activate the skill. Include trigger keywords and describe not just what the skill does, but *when* to use it.
+
+Optional frontmatter fields include `license`, `compatibility` (environment requirements), `metadata` (arbitrary key-value pairs like author and version), and `allowed-tools` (pre-approved tool list for security-conscious environments).
+
 **2. Markdown Body** — the actual instructions, as detailed as you need:
 
 ```markdown
@@ -136,7 +99,7 @@ description: >-
 
 ## Input Requirements
 - Campaign data with columns: date, campaign_name, impressions, clicks, conversions
-- Date range must be specified (do not use full range without user confirmation)
+- Date range must be specified
 
 ## Step 1: Data Quality Check
 - Verify no missing values in required columns
@@ -149,59 +112,172 @@ Calculate against these benchmarks:
 | CTR    | 2.5%      |
 | CVR    | 3.0%      |
 
-[... detailed instructions continue ...]
-
 ## Budget Reallocation
 Only when the user asks about budget reallocation, read:
 `references/budget_reallocation_rules.md`
 ```
 
-Notice that last line — the budget reallocation rules are in a separate file that **only loads when the user asks about it**. That's progressive disclosure in action.
+Notice that last line — the budget reallocation rules live in a separate file that **only loads when the user asks about it**. That is progressive disclosure in action. Instead of cramming everything into the context window upfront, the skill tells the agent where to find additional information and when to fetch it.
 
-### Required vs Optional Fields
+### Optional Directories
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | Yes | 1-64 chars, lowercase + hyphens, must match folder name |
-| `description` | Yes | 1-1024 chars, describes *what* and *when* |
-| `license` | No | e.g., `Apache-2.0` |
-| `compatibility` | No | Environment requirements, e.g., `Requires python3` |
-| `metadata` | No | Arbitrary key-value pairs (author, version, etc.) |
-| `allowed-tools` | No | Pre-approved tool list for the skill |
+| Directory | Purpose | Examples |
+|-----------|---------|----------|
+| `scripts/` | Executable code loaded and run on demand | Python data analysis, Bash automation, JS utilities |
+| `references/` | Additional documentation loaded when needed | Domain-specific rules, style guides, API docs |
+| `assets/` | Templates, images, and data files | Output templates, logos, schema files, sample data |
 
-### Naming Conventions
+Skills aren't limited to text — they can include scripts in Python, Bash, or JavaScript that the agent executes as part of the workflow. A PDF processing skill might include Python scripts for form extraction. A data analysis skill might include diagnostic scripts and visualization code. The agent loads and runs these only when the workflow requires it.
 
-- Use lowercase letters, numbers, and hyphens only
-- Use the `verb-ing + noun` pattern: `analyzing-marketing-campaign`, `generating-practice-questions`
-- Don't use reserved keywords like `claude` or `anthropic`
+## Where Skills Fit in the Agent Ecosystem
 
-## How to Build a Skill: A Walkthrough
+With so many technologies in the AI toolkit — MCP, skills, tools, subagents — understanding when to use what is essential. Here is how they all fit together:
 
-Let's break down how to build a production-quality skill by examining the structure and key decisions behind a real example — a **Strapi Configuration Skill** that scaffolds fully configured Strapi CMS projects. You don't need to recreate this exact skill (the full source is available in the [repository](https://github.com/anthropics/skills) if you want to explore it), but it demonstrates every important concept you need to build your own.
+```mermaid
+flowchart LR
+    subgraph External["External Systems"]
+        MCP["MCP Servers\nTools & Data"]
+    end
 
-### Step 1: Define the Folder Structure
+    subgraph Agent["Agent Runtime"]
+        Main[Main Agent]
+        Sub1[Subagent 1]
+        Sub2[Subagent 2]
+    end
 
-Start by creating your skill directory:
+    subgraph Knowledge["Skills Library"]
+        S1["Custom Skills\nDomain expertise"]
+        S2["Built-in Skills\nDocs, PDFs, Excel"]
+        S3["Shared Skills\nTeam workflows"]
+    end
+
+    MCP --> Main
+    Main --> Sub1
+    Main --> Sub2
+    S1 --> Main
+    S2 --> Main
+    S1 --> Sub1
+    S3 --> Sub2
+```
+
+The analogy from the course captures it perfectly: **tools are the hammer, saw, and nails. Skills are the knowledge of how to build a bookshelf.** The tools provide the raw capabilities (filesystem access, bash execution, API calls). Skills provide the procedural knowledge and domain expertise to use those tools in a specific, repeatable way.
+
+| Component | Role | Best For |
+|-----------|------|----------|
+| **Prompts** | Atomic unit of communication | One-off instructions |
+| **Tools** | Low-level capabilities (bash, filesystem, APIs) | The building blocks that power everything |
+| **MCP** | Connects agents to external systems and data | Database access, Google Drive, Slack, any external service |
+| **Skills** | Packaged workflows with domain expertise | Repeatable tasks, team-wide processes, predictable output |
+| **Subagents** | Isolated execution with own context window | Parallel tasks, specialized analysis, fine-grained permissions |
+
+### How They Compose Together
+
+The real power emerges when you combine these components. Consider a workflow that chains three skills with an MCP server:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Agent
+    participant MCP as BigQuery via MCP
+    participant S1 as Marketing Analysis Skill
+    participant S2 as Brand Guidelines Skill
+    participant S3 as PowerPoint Skill
+
+    U->>A: Analyze last week's campaigns\nand create a presentation
+    A->>S1: Load analysis instructions
+    A->>MCP: Query campaign data via SQL
+    MCP-->>A: Raw metrics
+    A->>A: Run funnel analysis,\nefficiency metrics, reallocation
+    A->>S2: Load brand colors, fonts, logos
+    A->>S3: Load presentation templates
+    A->>A: Generate branded slides with data
+    A-->>U: Download your presentation
+```
+
+In this flow, the **MCP server** provides the connection to BigQuery. The **marketing analysis skill** defines *how* to analyze the data (benchmarks, formulas, allocation rules). The **brand guidelines skill** defines *how things should look* (colors, typography, logos). The **built-in PowerPoint skill** handles the *document generation*. Each skill loads only its own context, only when needed.
+
+You can also dispatch **subagents** alongside skills. A main agent can spawn subagents — each with their own context window and specific skill access — to parallelize work. For instance, one subagent analyzes customer interviews while another processes survey data, both using the same "customer insights" skill but running in parallel. The parent agent collects and synthesizes their results.
+
+### When to Use What
+
+| Scenario | Reach For |
+|----------|-----------|
+| Need data from an external database or API | **MCP** |
+| Need a repeatable, documented workflow | **Skills** |
+| Need to teach the agent your company's specific process | **Skills** |
+| Need parallel execution with isolated context | **Subagents** |
+| Need real-time access to Google Drive / Slack / etc. | **MCP** |
+| Need specialized analysis that shouldn't pollute main context | **Subagents + Skills** |
+| Need a one-off quick task | **Just a prompt** |
+
+Use skills for procedural, predictable workflows. Use subagents for full agentic logic only when necessary for specialized or parallel tasks. Use MCP for any external data or tooling. And remember — skills, subagents, and MCP are composable. The sweet spot is usually a combination of all three.
+
+## Built-In Skills and the Skills Repository
+
+Anthropic ships several production-ready skills at [github.com/anthropics/skills](https://github.com/anthropics/skills):
+
+**Document Skills** (built into Claude AI, always active):
+
+| Skill | What It Does |
+|-------|-------------|
+| **Excel** | Create, edit, and analyze `.xlsx` spreadsheets with formatting and charts |
+| **PowerPoint** | Generate presentations with custom layouts, colors, typography |
+| **Word** | Create formatted `.docx` documents |
+| **PDF** | Extract text, fill forms, merge PDFs, convert to images |
+
+**Example Skills** (can be toggled on in Settings > Capabilities):
+
+| Skill | What It Does |
+|-------|-------------|
+| **Skill Creator** | Meta-skill that programmatically creates new skills following best practices |
+| **Code Review** | Structured code review with configurable standards |
+| **Data Analysis** | Statistical analysis workflows |
+
+The **skill-creator** is particularly useful — it's a skill that creates skills. It includes Python scripts for initializing the folder structure, packaging into a zip, and validating against best practices. It is enabled by default and can save significant time when building new skills.
+
+In Claude Code, you can install skills from the marketplace:
+
+```bash
+# Add the Anthropic skills marketplace
+/plugins marketplace add anthropics/skills
+
+# Verify installed skills
+/skills
+```
+
+Partner-built skills from companies like Atlassian, Figma, Canva, Stripe, Notion, and Zapier are also available through the skills directory.
+
+## How to Build a Skill: Architecture Walkthrough
+
+The best way to understand how all the pieces of a skill fit together is to look at a real-world example. Let's walk through the architecture of a **Strapi Configuration Skill** — a skill that scaffolds fully configured Strapi CMS projects with content types, seed data, public API access, and auto-populate middleware.
+
+The goal here is not to recreate this skill step-by-step, but to understand the architectural decisions and moving parts so you can apply these patterns to your own skills. For the full source code, check out the [repository](https://github.com/anthropics/skills).
+
+### The Directory Structure
 
 ```
 strapi-configuration/
-├── SKILL.md                  # The core instructions
-├── CLAUDE.md                 # Development context (optional but helpful)
+├── SKILL.md                  # Core instructions (480 lines)
+├── CLAUDE.md                 # Development context for contributors
 ├── README.md                 # User-facing documentation
-├── scripts/                  # Executable code (empty for now)
-├── references/               # Additional docs (empty for now)
-└── templates/                # Domain-specific assets
-    ├── blog.json
-    ├── ecommerce.json
-    ├── portfolio.json
-    └── restaurant.json
+├── scripts/                  # Empty — reserved for future helpers
+├── references/               # Empty — reserved for future docs
+└── templates/                # Domain-specific data files
+    ├── blog.json             # ~22KB preset definition
+    ├── ecommerce.json        # ~23KB preset definition
+    ├── portfolio.json        # ~25KB preset definition
+    └── restaurant.json       # ~24KB preset definition
 ```
 
-The standard directories are `scripts/`, `references/`, and `assets/`. You can also add domain-specific directories — here, `templates/` holds JSON preset definitions that the skill reads dynamically.
+This structure shows several important patterns:
 
-### Step 2: Write the YAML Frontmatter
+**Standard directories are present even when empty.** The `scripts/` and `references/` directories exist as placeholders — they signal to other developers (and the agent) that the skill follows the standard layout and may grow into these directories.
 
-This is the most critical part. The name and description are **the only things loaded into context at startup**, so they determine whether the agent recognizes when to use your skill:
+**Domain-specific directories are allowed.** The `templates/` directory isn't part of the standard spec (`scripts/`, `references/`, `assets/` are), but skills can include any additional directories that make sense for the domain. Here, each JSON template is a ~23KB definition containing content types, components, middleware configs, seed data, and permission rules for a specific project type.
+
+**Progressive disclosure is baked into the architecture.** Those four template files total ~94KB of data. None of it loads until the agent actually needs a specific template. When the user picks "blog," only `blog.json` enters the context — the other three templates stay on disk. That's ~70KB of tokens saved.
+
+### The Frontmatter: Your Skill's Elevator Pitch
 
 ```yaml
 ---
@@ -212,7 +288,7 @@ description: >-
   population. Use when the user wants to scaffold a new Strapi project for
   a specific use case such as blog, e-commerce, portfolio, or restaurant.
   Supports preset templates and custom project descriptions.
-compatibility: Requires Node.js
+compatibility: Requires Node.js and access to the strapi-core monorepo.
 allowed-tools: Bash Read Write Edit Glob Grep
 metadata:
   author: strapi
@@ -220,206 +296,131 @@ metadata:
 ---
 ```
 
-**Key decisions here:**
+Key decisions worth noting:
 
-- The **description** contains trigger keywords: "scaffold", "Strapi project", "blog", "e-commerce", "portfolio", "restaurant". When a user mentions any of these, the agent knows to activate this skill
-- **`allowed-tools`** declares upfront which tools the skill needs — this is important for security-conscious environments
-- **`compatibility`** tells the agent (and the user) what the runtime requirements are
+- The **description** is packed with trigger keywords: "scaffold", "Strapi project", "blog", "e-commerce", "portfolio", "restaurant", "content types", "seed data." When a user says any of these words, the agent knows this skill is relevant
+- **`compatibility`** declares the runtime requirements upfront — the agent (and the user) knows this needs Node.js before it even starts
+- **`allowed-tools`** explicitly declares which tools the skill will use. In security-conscious environments, this allows pre-authorization rather than prompting for each tool at runtime
 
-### Step 3: Structure the Instructions as a Step-by-Step Workflow
+### The Instruction Body: A Deterministic Workflow
 
-The body of `SKILL.md` should read like a precise recipe. The Strapi skill breaks execution into 9 sequential steps:
+The body of this SKILL.md is structured as 9 sequential steps, each with clear entry/exit criteria. Here is the high-level flow:
 
-```markdown
-## Execution Steps
-
-When the user invokes this skill, follow these steps **in order**:
-
-### Step 1: Parse Arguments and Select Template
-Extract the output path. Present a selection menu to the user...
-
-### Step 2: Read the Template
-Read the template JSON file at `templates/<preset>.json`...
-
-### Step 3: Create the Strapi Project
-Run the CLI: `node packages/cli/.../index.js <path> --non-interactive`
-
-### Step 4: Generate Content Type Schemas
-For each content type, create the full API structure...
-
-### Step 5: Generate Middleware Files
-### Step 6: Generate Component Files
-### Step 7: Generate Seed Script
-### Step 8: Add Seed Script to package.json
-### Step 9: Summary
+```mermaid
+flowchart TD
+    S1["Step 1: Parse Arguments\nSelect Template"] --> D{Preset or\nCustom?}
+    D -->|Preset| S2["Step 2: Read Template JSON"]
+    D -->|Custom| S2b["Step 2b: Generate Template\nfrom Description"]
+    S2 --> S3["Step 3: Create Strapi Project\nvia CLI"]
+    S2b --> S3
+    S3 --> S4["Step 4: Generate Content Type\nSchemas + API Structure"]
+    S4 --> S5["Step 5: Generate Middleware\n(auto-populate)"]
+    S5 --> S6["Step 6: Generate Components"]
+    S6 --> S7["Step 7: Generate Seed Script"]
+    S7 --> S8["Step 8: Update package.json"]
+    S8 --> S9["Step 9: Print Summary"]
 ```
 
-This step-by-step format is a best practice for skills that need deterministic execution. Each step has:
+Several patterns make this workflow reliable:
 
-- **Clear entry/exit criteria** — what input it needs, what output it produces
-- **Exact code templates** — not vague descriptions, but literal TypeScript/JSON the agent should write
-- **Conditional branches** — Step 2 has a "Step 2b" for custom projects vs presets
+**Explicit branching.** Step 1 presents a selection menu and routes to either Step 2 (preset template) or Step 2b (custom generation). The branching is clearly marked — the agent never has to guess which path to follow.
 
-### Step 4: Use Progressive Disclosure for Reference Files
+**Code templates, not descriptions.** Rather than saying "create a controller," the skill provides the exact TypeScript code:
 
-The skill doesn't dump all template data into the instructions. Instead, it tells the agent where to find them:
-
-```markdown
-### Step 2: Read the Template
-
-Read the template JSON file at `templates/<preset>.json`.
-
-The template contains:
-- `contentTypes` - Collection types and single types
-- `components` - Reusable component definitions
-- `middlewares` - Route-based populate configs
-- `seedData` - Sample data entries
-- `publicPermissions` - Public API endpoint config
-```
-
-The agent reads the specific template file only when it needs it. With four templates at ~23KB each, this saves ~70KB of context tokens that would otherwise be wasted.
-
-### Step 5: Include Code Templates for Predictable Output
-
-For technical skills, include exact code patterns. Don't say "create a controller" — show the exact code:
-
-```markdown
-**Controller** (`<name>.ts`):
-
-\```typescript
+```typescript
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::<name>.<name>');
-\```
 ```
 
-This eliminates guesswork and ensures the agent produces code that actually works with the target framework.
+This eliminates guesswork and ensures the generated code actually works with the target framework. The skill includes templates for controllers, services, routes (with and without middleware), middleware files, component schemas, and the entire seed script.
 
-### Step 6: Handle Branching Logic
-
-Real workflows aren't always linear. The Strapi skill handles two distinct paths — preset-based and custom:
+**Progressive file loading.** Step 2 says "Read the template JSON file at `templates/<preset>.json`." It doesn't embed the template data in the SKILL.md — it tells the agent where to find it and what structure to expect:
 
 ```markdown
-### Step 2b: Custom Project Generation
-
-When the user provides a description instead of a preset:
-
-1. Gather requirements (ask 1-2 clarifying questions)
-2. Design the content model (following patterns from existing templates)
-3. Generate all template data in memory
-4. Generate seed data (2-5 realistic entries per type)
-5. Design middleware populate configs
-6. Set public permissions
-7. Optionally save as a reusable template
+The template contains:
+- `contentTypes` - Collection types and single types (schemas)
+- `components` - Reusable component definitions
+- `middlewares` - Route-based populate middleware configs
+- `seedData` - Sample data entries for each content type
+- `publicPermissions` - Which API endpoints to make publicly accessible
 ```
 
-This branching is clearly marked and self-contained — the agent knows exactly which path to follow.
+**The custom path generates data dynamically.** Step 2b is a mini-workflow within the workflow — it gathers requirements, designs a content model following patterns from existing templates, generates seed data, configures middleware, sets permissions, and optionally saves the result as a reusable template for next time. This demonstrates how skills can handle both deterministic paths (presets) and creative ones (custom generation) within the same workflow.
 
-### Key Takeaways for Building Your Own Skills
+### Supporting Files: CLAUDE.md and README.md
 
-Here are the principles that make the difference between a skill that works sometimes and one that works reliably:
+This skill includes two additional files that aren't part of the agent skills spec but demonstrate good practice:
 
-**1. Invest heavily in the description.** This is your skill's "elevator pitch" to the agent. Include trigger keywords, use cases, and what the skill does NOT do.
+**`CLAUDE.md`** captures development context — the directory structure, key conventions for the Strapi schema format, CLI testing commands, common pitfalls (like `draftAndPublish` needing to be nested inside `options`, not at the top level), and future improvements. This is valuable for both the agent when it needs to modify the skill and for human developers maintaining it.
 
-**2. Be explicit, not abstract.** Instead of "generate appropriate files," specify exactly which files, in which directories, with which content patterns.
+**`README.md`** is user-facing documentation — installation instructions, quick start examples, usage for each preset, and what gets generated. It explains how to install the skill at project scope (`<project>/.claude/skills/`) or globally (`~/.claude/skills/`).
 
-**3. Use progressive disclosure aggressively.** If a piece of information is only needed 20% of the time, put it in a reference file.
+### What Makes This Skill Work Well
 
-**4. Provide code templates, not descriptions.** Agents produce more reliable output when they can pattern-match against exact examples.
+Looking at the architecture holistically, several design decisions stand out:
 
-**5. Number your steps.** Sequential numbering creates a clear execution path and makes debugging easier when something goes wrong.
+1. **The description is rich with trigger keywords** — the agent can match user intent to this skill reliably
+2. **Steps are numbered and sequential** — there is no ambiguity about execution order
+3. **Code templates are exact, not described** — pattern matching produces reliable output
+4. **Large data lives in files, not instructions** — 94KB of template data stays on disk until needed
+5. **Branching is explicit** — preset vs. custom paths are clearly defined
+6. **The skill stays under 500 lines** — keeping the main instructions concise and deferring detail to external files
+7. **Edge cases are handled** — what if no path is provided? What if the user picks custom? What if they want to save the result as a template?
 
-**6. Keep SKILL.md under 500 lines.** If it's growing beyond that, move content into `references/` or `scripts/`.
+## Best Practices for Building Your Own Skills
 
-**7. Add a `CLAUDE.md` for development context.** This file captures conventions, common pitfalls, and testing commands — useful for both the agent and human developers maintaining the skill.
+Based on the official specification, Anthropic's engineering blog, and patterns observed across production skills:
 
-**8. Test with the skill-creator.** Run your skill through Anthropic's built-in skill-creator skill to check against best practices. It scores your skill and provides specific recommendations.
+### Naming and Description
 
-## Where Skills Live
+- **Name**: Use lowercase letters, numbers, and hyphens. Follow the `verb-ing + noun` pattern: `analyzing-marketing-campaign`, `generating-practice-questions`. Don't use reserved keywords like "claude" or "anthropic." Max 64 characters
+- **Description**: This is how the agent decides when to use your skill. Describe both *what it does* and *when to use it*. Include trigger keywords. Max 1,024 characters
 
-Skills can be installed at different scopes depending on your needs:
+### Structure and Content
+
+- **Keep SKILL.md under 500 lines.** Move detailed content into `references/`, `scripts/`, or `assets/`
+- **Use step-by-step instructions.** Number your steps. Specify edge cases. Be clear about what to skip and why
+- **Provide code templates, not descriptions.** Agents produce more reliable output when they can pattern-match against exact examples
+- **Use progressive disclosure aggressively.** If a piece of information is only needed 20% of the time, put it in a reference file
+- **Use forward slashes** in all file paths, even on Windows
+
+### Degree of Freedom
+
+Think about how much freedom to give the agent:
+
+- **Low freedom** for processes that must be followed exactly (compliance checks, data pipelines, test procedures)
+- **High freedom** for creative outputs where variety is desirable (design, writing, brainstorming)
+
+### Testing and Evaluation
+
+- Run your skill through the **skill-creator** skill to score it against best practices
+- Write test cases like unit tests: define input queries, expected behaviors, and output formats
+- Test across all models you plan to use — different models may interpret instructions differently
+- Gather human feedback and iterate
+
+## Where Skills Can Live
 
 | Scope | Location | Use Case |
 |-------|----------|----------|
 | **Project** | `<project>/.claude/skills/` | Team-specific workflows tied to a codebase |
 | **User** | `~/.claude/skills/` | Personal skills available across all projects |
-| **Claude AI** | Settings > Capabilities > Skills | Upload as zip, available in the Claude web UI |
-| **Marketplace** | `anthropics/skills` on GitHub | Community and official skills you can install |
+| **Claude AI** | Settings > Capabilities > Skills | Upload as zip, available in the web UI |
+| **Marketplace** | `anthropics/skills` on GitHub | Community and official skills |
 
-In Claude Code, you can install skills from the marketplace:
+## The Open Standard: Cross-Platform Portability
+
+Agent Skills follow the same playbook Anthropic used with the Model Context Protocol: build a specification that solves a real interoperability problem, release it as an open standard, and let ecosystem adoption create network effects.
+
+The platforms that have adopted the standard now include Claude, Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot, VS Code, Cursor, Roo Code, Amp, Goose, Mistral AI, Databricks, and many others — over 26 at last count. Partner-built skills from Atlassian, Figma, Canva, Stripe, Notion, and Zapier are available at launch.
+
+The specification and reference library live at [github.com/agentskills/agentskills](https://github.com/agentskills/agentskills). The reference library includes a validation tool you can use to check your skills against the spec:
 
 ```bash
-# Add the Anthropic skills marketplace
-/plugins marketplace add anthropics/skills
-
-# Then enable specific skill collections
+skills-ref validate ./my-skill
 ```
-
-After installation, verify your skills are loaded with the `/skills` command.
-
-## Built-In Skills Worth Knowing
-
-Anthropic ships several production-ready skills:
-
-| Skill | What It Does |
-|-------|-------------|
-| **Excel** | Create, edit, and analyze `.xlsx` spreadsheets with formatting and charts |
-| **PowerPoint** | Generate presentations with custom layouts, colors, and typography |
-| **Word** | Create formatted `.docx` documents |
-| **PDF** | Extract text, fill forms, merge PDFs, convert to images |
-| **Skill Creator** | Meta-skill that creates new skills following best practices |
-
-The document skills (Excel, PowerPoint, Word, PDF) are built into Claude AI and always active. The skill-creator is enabled by default. Additional example skills (code review, data analysis, etc.) can be toggled on in Settings > Capabilities.
-
-## Composing Skills for Complex Workflows
-
-The real power of skills emerges when you combine them. Consider this workflow that chains three skills together:
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant A as Agent
-    participant MCP as BigQuery (MCP)
-    participant S1 as Marketing Analysis Skill
-    participant S2 as Brand Guidelines Skill
-    participant S3 as PowerPoint Skill (Built-in)
-
-    U->>A: Analyze last week's campaigns<br/>and create a presentation
-    A->>S1: Load analysis instructions
-    A->>MCP: Query campaign data
-    MCP-->>A: Raw metrics
-    A->>A: Run funnel analysis, efficiency metrics
-    A->>S2: Load brand colors, fonts, logos
-    A->>S3: Load presentation templates
-    A->>A: Generate branded slides with data
-    A-->>U: Download your presentation
-```
-
-In this flow:
-- The **MCP server** provides the connection to BigQuery
-- The **marketing analysis skill** defines *how* to analyze the data
-- The **brand guidelines skill** defines *how things should look*
-- The **built-in PowerPoint skill** handles the *document generation*
-
-Each skill loads only its own context, only when needed. The agent orchestrates everything.
-
-## Skills vs MCP vs Subagents: When to Use What
-
-| Scenario | Use |
-|----------|-----|
-| Need data from an external database or API | **MCP** |
-| Need a repeatable, documented workflow | **Skills** |
-| Need parallel execution with isolated context | **Subagents** |
-| Need to teach the agent your company's process | **Skills** |
-| Need real-time access to Google Drive / Slack / etc. | **MCP** |
-| Need specialized analysis that shouldn't pollute main context | **Subagents + Skills** |
-| Need a one-off quick task | **Just a prompt** |
-
-The sweet spot is usually a combination: MCP servers bring in the data and tools, skills define the workflows, and subagents handle parallelization when needed.
 
 ## Getting Started: Your First Skill in 5 Minutes
-
-Ready to build your first skill? Here's the minimal setup:
 
 **1. Create the folder:**
 ```bash
@@ -427,14 +428,16 @@ mkdir -p .claude/skills/my-first-skill
 ```
 
 **2. Create `SKILL.md`:**
-```markdown
+```yaml
 ---
 name: my-first-skill
 description: >-
   Describe what your skill does and when to trigger it.
   Include keywords that users are likely to say.
 ---
+```
 
+```markdown
 # My First Skill
 
 ## Steps
@@ -449,30 +452,23 @@ description: >-
 [What the final result should look like]
 ```
 
-**3. Add reference files if needed:**
-```bash
-mkdir -p .claude/skills/my-first-skill/references
-# Add any additional docs here
-```
+**3. Test it** by starting a new session and asking a question that matches your skill's description.
 
-**4. Test it** by starting a new Claude Code session and asking a question that matches your skill's description.
+**4. Iterate.** Run it through the skill-creator for best-practice feedback, or validate it with the reference library. Refine based on actual usage.
 
-**5. Iterate.** Run it through the skill-creator for best-practice feedback, and refine based on actual usage.
-
-## What's Next
-
-Agent Skills are still evolving rapidly. The specification is open and accepting contributions at [github.com/agentskills/agentskills](https://github.com/agentskills/agentskills). With 26+ platforms already adopting the standard, skills you build today are an investment that works everywhere.
-
-Whether you're automating a weekly report, encoding your team's code review process, or building a project scaffolding tool, skills transform one-off prompts into durable, shareable, composable knowledge. And the best part — you don't need to be a developer to create one. If you can write a clear set of instructions in markdown, you can build a skill.
+Whether you're automating a weekly report, encoding your team's code review process, building a project scaffolding tool, or packaging brand guidelines for consistent design output — skills transform one-off prompts into durable, shareable, composable knowledge that works everywhere.
 
 **Citations**
 
 - Agent Skills Specification: https://agentskills.io/specification
 - Introducing Agent Skills (Anthropic): https://www.anthropic.com/news/skills
 - Equipping Agents for the Real World with Agent Skills: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+- Skill Authoring Best Practices (Claude Docs): https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+- Agent Skills Overview (Claude API Docs): https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
 - Agent Skills GitHub Repository: https://github.com/anthropics/skills
 - Agent Skills Open Standard Repository: https://github.com/agentskills/agentskills
-- Claude Code Skills Documentation: https://code.claude.com/docs/en/skills
 - OpenAI Codex Skills Documentation: https://developers.openai.com/codex/skills/
-- Gemini CLI Skills Documentation: https://geminicli.com/docs/cli/skills/
-- DeepLearning.AI Course Notes (source material)
+- VS Code Agent Skills: https://code.visualstudio.com/docs/copilot/customization/agent-skills
+- Anthropic Makes Agent Skills an Open Standard (SiliconANGLE): https://siliconangle.com/2025/12/18/anthropic-makes-agent-skills-open-standard/
+- Agent Skills: Anthropic's Next Bid to Define AI Standards (The New Stack): https://thenewstack.io/agent-skills-anthropics-next-bid-to-define-ai-standards/
+- DeepLearning.AI Agent Skills Course (source material)
