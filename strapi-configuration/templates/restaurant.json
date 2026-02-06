@@ -1,0 +1,789 @@
+{
+  "name": "restaurant",
+  "displayName": "Restaurant",
+  "description": "A complete restaurant website template with menu management, reservations, locations, and content pages. Includes menu items with dietary flags and allergen tracking, table reservations, multi-location support, and SEO-ready pages.",
+  "contentTypes": {
+    "menu-item": {
+      "kind": "collectionType",
+      "collectionName": "menu_items",
+      "info": {
+        "singularName": "menu-item",
+        "pluralName": "menu-items",
+        "displayName": "Menu Item",
+        "description": "Menu items with pricing, dietary flags, allergens, and category assignment"
+      },
+      "options": {
+        "draftAndPublish": true
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "description": {
+          "type": "text",
+          "maxLength": 500
+        },
+        "price": {
+          "type": "decimal",
+          "required": true
+        },
+        "image": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "category": {
+          "type": "relation",
+          "relation": "manyToOne",
+          "target": "api::menu-category.menu-category",
+          "inversedBy": "items"
+        },
+        "allergens": {
+          "type": "component",
+          "component": "restaurant.allergen-tag",
+          "repeatable": true
+        },
+        "isVegetarian": {
+          "type": "boolean",
+          "default": false
+        },
+        "isVegan": {
+          "type": "boolean",
+          "default": false
+        },
+        "isGlutenFree": {
+          "type": "boolean",
+          "default": false
+        },
+        "spiceLevel": {
+          "type": "enumeration",
+          "enum": ["mild", "medium", "hot", "extra-hot"]
+        },
+        "featured": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "menu-category": {
+      "kind": "collectionType",
+      "collectionName": "menu_categories",
+      "info": {
+        "singularName": "menu-category",
+        "pluralName": "menu-categories",
+        "displayName": "Menu Category",
+        "description": "Categories for organizing menu items (e.g. appetizers, mains, desserts)"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "description": {
+          "type": "text"
+        },
+        "image": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "order": {
+          "type": "integer",
+          "default": 0
+        },
+        "items": {
+          "type": "relation",
+          "relation": "oneToMany",
+          "target": "api::menu-item.menu-item",
+          "mappedBy": "category"
+        }
+      }
+    },
+    "reservation": {
+      "kind": "collectionType",
+      "collectionName": "reservations",
+      "info": {
+        "singularName": "reservation",
+        "pluralName": "reservations",
+        "displayName": "Reservation",
+        "description": "Table reservations with guest details, party size, and status tracking"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "email": {
+          "type": "email",
+          "required": true
+        },
+        "phone": {
+          "type": "string",
+          "required": true
+        },
+        "date": {
+          "type": "date",
+          "required": true
+        },
+        "time": {
+          "type": "string",
+          "required": true
+        },
+        "partySize": {
+          "type": "integer",
+          "required": true,
+          "min": 1,
+          "max": 20
+        },
+        "specialRequests": {
+          "type": "text"
+        },
+        "status": {
+          "type": "enumeration",
+          "enum": ["pending", "confirmed", "cancelled", "completed"],
+          "default": "pending"
+        }
+      }
+    },
+    "location": {
+      "kind": "collectionType",
+      "collectionName": "locations",
+      "info": {
+        "singularName": "location",
+        "pluralName": "locations",
+        "displayName": "Location",
+        "description": "Restaurant locations with address, contact info, and opening hours"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "address": {
+          "type": "text",
+          "required": true
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "email"
+        },
+        "image": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "mapUrl": {
+          "type": "string"
+        },
+        "openingHours": {
+          "type": "component",
+          "component": "restaurant.opening-hours",
+          "repeatable": true
+        }
+      }
+    },
+    "homepage": {
+      "kind": "singleType",
+      "collectionName": "homepages",
+      "info": {
+        "singularName": "homepage",
+        "pluralName": "homepages",
+        "displayName": "Homepage",
+        "description": "The restaurant homepage with hero section and SEO"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "heroTitle": {
+          "type": "string",
+          "required": true
+        },
+        "heroSubtitle": {
+          "type": "text"
+        },
+        "heroImage": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "aboutSnippet": {
+          "type": "text",
+          "maxLength": 500
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "about": {
+      "kind": "singleType",
+      "collectionName": "abouts",
+      "info": {
+        "singularName": "about",
+        "pluralName": "abouts",
+        "displayName": "About",
+        "description": "The about page with restaurant story and team members"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "story": {
+          "type": "richtext"
+        },
+        "teamMembers": {
+          "type": "component",
+          "component": "restaurant.team-member",
+          "repeatable": true
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "global": {
+      "kind": "singleType",
+      "collectionName": "globals",
+      "info": {
+        "singularName": "global",
+        "pluralName": "globals",
+        "displayName": "Global",
+        "description": "Global restaurant settings including name, description, logo, and social links"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "restaurantName": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "text",
+          "required": true
+        },
+        "logo": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "defaultSeo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        },
+        "socialLinks": {
+          "type": "component",
+          "component": "shared.social-link",
+          "repeatable": true
+        }
+      }
+    }
+  },
+  "components": {
+    "shared": {
+      "seo": {
+        "collectionName": "components_shared_seo",
+        "info": {
+          "displayName": "Seo",
+          "icon": "search",
+          "description": "SEO metadata for pages"
+        },
+        "options": {},
+        "attributes": {
+          "metaTitle": {
+            "type": "string",
+            "required": true
+          },
+          "metaDescription": {
+            "type": "text",
+            "required": true
+          },
+          "shareImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      },
+      "media": {
+        "collectionName": "components_shared_media",
+        "info": {
+          "displayName": "Media",
+          "icon": "photograph",
+          "description": "A single media file (image, video, or document)"
+        },
+        "options": {},
+        "attributes": {
+          "file": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images", "files", "videos"]
+          }
+        }
+      },
+      "rich-text": {
+        "collectionName": "components_shared_rich_texts",
+        "info": {
+          "displayName": "Rich text",
+          "icon": "pencil-alt",
+          "description": "A rich text block for long-form content"
+        },
+        "options": {},
+        "attributes": {
+          "body": {
+            "type": "richtext"
+          }
+        }
+      },
+      "social-link": {
+        "collectionName": "components_shared_social_links",
+        "info": {
+          "displayName": "Social Link",
+          "icon": "link",
+          "description": "A social media platform link"
+        },
+        "options": {},
+        "attributes": {
+          "platform": {
+            "type": "enumeration",
+            "enum": ["facebook", "instagram", "twitter", "yelp", "tripadvisor", "google"]
+          },
+          "url": {
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    },
+    "restaurant": {
+      "allergen-tag": {
+        "collectionName": "components_restaurant_allergen_tags",
+        "info": {
+          "displayName": "Allergen Tag",
+          "icon": "exclamation-triangle",
+          "description": "A food allergen label"
+        },
+        "options": {},
+        "attributes": {
+          "name": {
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "opening-hours": {
+        "collectionName": "components_restaurant_opening_hours",
+        "info": {
+          "displayName": "Opening Hours",
+          "icon": "clock",
+          "description": "Daily opening and closing times for a location"
+        },
+        "options": {},
+        "attributes": {
+          "day": {
+            "type": "enumeration",
+            "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+            "required": true
+          },
+          "openTime": {
+            "type": "string",
+            "required": true
+          },
+          "closeTime": {
+            "type": "string",
+            "required": true
+          },
+          "isClosed": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "team-member": {
+        "collectionName": "components_restaurant_team_members",
+        "info": {
+          "displayName": "Team Member",
+          "icon": "user",
+          "description": "A restaurant team member with name, role, and bio"
+        },
+        "options": {},
+        "attributes": {
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "role": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "text"
+          },
+          "photo": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      }
+    }
+  },
+  "middlewares": {
+    "menu-item": {
+      "populate": {
+        "image": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "category": {
+          "fields": ["name", "slug"]
+        },
+        "allergens": {
+          "populate": "*"
+        }
+      }
+    },
+    "menu-category": {
+      "populate": {
+        "image": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "items": {
+          "fields": ["name", "slug", "price", "description", "isVegetarian", "isVegan", "isGlutenFree", "spiceLevel", "featured"]
+        }
+      }
+    },
+    "location": {
+      "populate": {
+        "image": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "openingHours": {
+          "populate": "*"
+        }
+      }
+    },
+    "homepage": {
+      "populate": {
+        "heroImage": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "about": {
+      "populate": {
+        "teamMembers": {
+          "populate": {
+            "photo": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "global": {
+      "populate": {
+        "logo": {
+          "fields": ["name", "alternativeText", "url"]
+        },
+        "defaultSeo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "socialLinks": {
+          "populate": "*"
+        }
+      }
+    }
+  },
+  "seedData": {
+    "menu-category": [
+      {
+        "name": "Appetizers",
+        "slug": "appetizers",
+        "description": "Start your meal with our selection of freshly prepared appetizers and small plates.",
+        "order": 1
+      },
+      {
+        "name": "Main Courses",
+        "slug": "main-courses",
+        "description": "Hearty entrees crafted with locally sourced ingredients and bold flavors.",
+        "order": 2
+      },
+      {
+        "name": "Desserts",
+        "slug": "desserts",
+        "description": "Indulge in our handcrafted desserts made fresh daily by our pastry chef.",
+        "order": 3
+      },
+      {
+        "name": "Beverages",
+        "slug": "beverages",
+        "description": "Refreshing drinks, craft cocktails, and a curated wine list.",
+        "order": 4
+      }
+    ],
+    "menu-item": [
+      {
+        "name": "Crispy Calamari",
+        "slug": "crispy-calamari",
+        "description": "Lightly battered calamari rings served with house-made marinara sauce and lemon aioli.",
+        "price": 12.95,
+        "isVegetarian": false,
+        "isVegan": false,
+        "isGlutenFree": false,
+        "spiceLevel": "mild",
+        "featured": true,
+        "allergens": [
+          { "name": "shellfish" },
+          { "name": "gluten" }
+        ]
+      },
+      {
+        "name": "Roasted Beet Salad",
+        "slug": "roasted-beet-salad",
+        "description": "Golden and red beets with arugula, candied walnuts, goat cheese, and balsamic vinaigrette.",
+        "price": 11.50,
+        "isVegetarian": true,
+        "isVegan": false,
+        "isGlutenFree": true,
+        "spiceLevel": "mild",
+        "featured": false,
+        "allergens": [
+          { "name": "dairy" },
+          { "name": "nuts" }
+        ]
+      },
+      {
+        "name": "Grilled Salmon",
+        "slug": "grilled-salmon",
+        "description": "Atlantic salmon fillet grilled to perfection, served with sauteed spinach and roasted fingerling potatoes.",
+        "price": 26.95,
+        "isVegetarian": false,
+        "isVegan": false,
+        "isGlutenFree": true,
+        "spiceLevel": "mild",
+        "featured": true,
+        "allergens": [
+          { "name": "fish" }
+        ]
+      },
+      {
+        "name": "Spicy Thai Basil Chicken",
+        "slug": "spicy-thai-basil-chicken",
+        "description": "Wok-fired chicken thighs with Thai basil, chili peppers, garlic, and jasmine rice.",
+        "price": 19.50,
+        "isVegetarian": false,
+        "isVegan": false,
+        "isGlutenFree": true,
+        "spiceLevel": "hot",
+        "featured": false,
+        "allergens": [
+          { "name": "soy" }
+        ]
+      },
+      {
+        "name": "Wild Mushroom Risotto",
+        "slug": "wild-mushroom-risotto",
+        "description": "Creamy arborio rice with a medley of wild mushrooms, truffle oil, and shaved Parmigiano-Reggiano.",
+        "price": 22.00,
+        "isVegetarian": true,
+        "isVegan": false,
+        "isGlutenFree": true,
+        "spiceLevel": "mild",
+        "featured": true,
+        "allergens": [
+          { "name": "dairy" }
+        ]
+      },
+      {
+        "name": "Chocolate Lava Cake",
+        "slug": "chocolate-lava-cake",
+        "description": "Warm dark chocolate cake with a molten center, served with vanilla bean ice cream and fresh berries.",
+        "price": 10.95,
+        "isVegetarian": true,
+        "isVegan": false,
+        "isGlutenFree": false,
+        "spiceLevel": "mild",
+        "featured": true,
+        "allergens": [
+          { "name": "dairy" },
+          { "name": "gluten" },
+          { "name": "eggs" }
+        ]
+      },
+      {
+        "name": "Mango Sorbet Trio",
+        "slug": "mango-sorbet-trio",
+        "description": "Three scoops of house-made sorbet: mango, passion fruit, and raspberry, garnished with fresh mint.",
+        "price": 8.50,
+        "isVegetarian": true,
+        "isVegan": true,
+        "isGlutenFree": true,
+        "spiceLevel": "mild",
+        "featured": false,
+        "allergens": []
+      },
+      {
+        "name": "Sparkling Lavender Lemonade",
+        "slug": "sparkling-lavender-lemonade",
+        "description": "Fresh-squeezed lemonade infused with lavender syrup and sparkling water, served over ice.",
+        "price": 6.50,
+        "isVegetarian": true,
+        "isVegan": true,
+        "isGlutenFree": true,
+        "spiceLevel": "mild",
+        "featured": false,
+        "allergens": []
+      }
+    ],
+    "location": [
+      {
+        "name": "Downtown Flagship",
+        "address": "742 Evergreen Terrace, Suite 100\nSpringfield, IL 62704",
+        "phone": "+1 (555) 234-5678",
+        "email": "downtown@therestaurant.com",
+        "mapUrl": "https://maps.google.com/?q=742+Evergreen+Terrace+Springfield+IL",
+        "openingHours": [
+          { "day": "monday", "openTime": "11:00", "closeTime": "22:00", "isClosed": false },
+          { "day": "tuesday", "openTime": "11:00", "closeTime": "22:00", "isClosed": false },
+          { "day": "wednesday", "openTime": "11:00", "closeTime": "22:00", "isClosed": false },
+          { "day": "thursday", "openTime": "11:00", "closeTime": "22:00", "isClosed": false },
+          { "day": "friday", "openTime": "11:00", "closeTime": "23:00", "isClosed": false },
+          { "day": "saturday", "openTime": "10:00", "closeTime": "23:00", "isClosed": false },
+          { "day": "sunday", "openTime": "10:00", "closeTime": "21:00", "isClosed": false }
+        ]
+      }
+    ],
+    "reservation": [
+      {
+        "name": "Jane Cooper",
+        "email": "jane.cooper@example.com",
+        "phone": "+1 (555) 111-2233",
+        "date": "2026-02-14",
+        "time": "19:00",
+        "partySize": 2,
+        "specialRequests": "Window table preferred. Celebrating an anniversary.",
+        "status": "confirmed"
+      },
+      {
+        "name": "Robert Chen",
+        "email": "robert.chen@example.com",
+        "phone": "+1 (555) 444-5566",
+        "date": "2026-02-15",
+        "time": "18:30",
+        "partySize": 6,
+        "specialRequests": "One guest has a nut allergy. High chair needed for a toddler.",
+        "status": "pending"
+      },
+      {
+        "name": "Maria Gonzalez",
+        "email": "maria.gonzalez@example.com",
+        "phone": "+1 (555) 777-8899",
+        "date": "2026-02-10",
+        "time": "20:00",
+        "partySize": 4,
+        "specialRequests": "",
+        "status": "completed"
+      }
+    ],
+    "homepage": [
+      {
+        "heroTitle": "A Culinary Experience Like No Other",
+        "heroSubtitle": "Fresh, locally sourced ingredients meet bold, inventive flavors. Join us for an unforgettable dining experience in the heart of downtown.",
+        "aboutSnippet": "For over a decade, our chefs have been crafting dishes that celebrate seasonal ingredients and global culinary traditions. Every plate tells a story of passion, quality, and creativity."
+      }
+    ],
+    "about": [
+      {
+        "title": "Our Story",
+        "story": "## From Farm to Table\n\nFounded in 2014, The Restaurant began as a small neighborhood bistro with a simple mission: serve honest food made from the finest local ingredients.\n\nOver the years, we have grown into one of the city's most beloved dining destinations, but our philosophy remains the same. We partner directly with local farmers, fishermen, and artisan producers to bring you dishes that are as fresh as they are flavorful.\n\n## Our Philosophy\n\nWe believe great food starts with great ingredients. Our menu changes with the seasons, reflecting what is at its peak. Our kitchen team draws inspiration from culinary traditions around the world, blending classic techniques with modern creativity.\n\nWhether you are joining us for a casual weeknight dinner or a special celebration, we want every visit to feel like coming home.",
+        "teamMembers": [
+          {
+            "name": "Elena Martinez",
+            "role": "Executive Chef",
+            "bio": "Chef Elena trained at the Culinary Institute of America and spent five years in Michelin-starred kitchens in Barcelona and New York before founding The Restaurant. Her cooking style blends Mediterranean techniques with locally foraged ingredients."
+          },
+          {
+            "name": "James Okafor",
+            "role": "General Manager",
+            "bio": "James brings over fifteen years of hospitality experience to The Restaurant. His warm, detail-oriented approach to service ensures every guest feels welcome from the moment they walk through the door."
+          }
+        ]
+      }
+    ],
+    "global": [
+      {
+        "restaurantName": "The Restaurant",
+        "description": "A contemporary dining destination serving creative, locally sourced cuisine in a warm and inviting atmosphere. Located in downtown Springfield.",
+        "socialLinks": [
+          { "platform": "instagram", "url": "https://instagram.com/therestaurant" },
+          { "platform": "facebook", "url": "https://facebook.com/therestaurant" },
+          { "platform": "yelp", "url": "https://yelp.com/biz/the-restaurant-springfield" },
+          { "platform": "tripadvisor", "url": "https://tripadvisor.com/the-restaurant" }
+        ]
+      }
+    ]
+  },
+  "publicPermissions": {
+    "menu-item": ["find", "findOne"],
+    "menu-category": ["find", "findOne"],
+    "reservation": ["find", "findOne", "create"],
+    "location": ["find", "findOne"],
+    "homepage": ["find"],
+    "about": ["find"],
+    "global": ["find"]
+  }
+}

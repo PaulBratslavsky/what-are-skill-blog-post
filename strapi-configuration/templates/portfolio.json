@@ -1,0 +1,717 @@
+{
+  "name": "portfolio",
+  "displayName": "Portfolio",
+  "description": "A portfolio template for showcasing projects, skills, and professional experience. Includes project galleries, skill listings, testimonials, and pages for homepage, about, contact, and global site settings.",
+  "contentTypes": {
+    "project": {
+      "kind": "collectionType",
+      "collectionName": "projects",
+      "info": {
+        "singularName": "project",
+        "pluralName": "projects",
+        "displayName": "Project",
+        "description": "Portfolio projects with rich content, galleries, and technology tags"
+      },
+      "options": {
+        "draftAndPublish": true
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "title"
+        },
+        "description": {
+          "type": "text",
+          "maxLength": 500
+        },
+        "content": {
+          "type": "richtext"
+        },
+        "featured": {
+          "type": "boolean",
+          "default": false
+        },
+        "coverImage": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "gallery": {
+          "type": "media",
+          "multiple": true,
+          "allowedTypes": ["images"]
+        },
+        "projectUrl": {
+          "type": "string"
+        },
+        "repositoryUrl": {
+          "type": "string"
+        },
+        "category": {
+          "type": "relation",
+          "relation": "manyToOne",
+          "target": "api::project-category.project-category",
+          "inversedBy": "projects"
+        },
+        "technologies": {
+          "type": "component",
+          "component": "portfolio.technology-tag",
+          "repeatable": true
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "project-category": {
+      "kind": "collectionType",
+      "collectionName": "project_categories",
+      "info": {
+        "singularName": "project-category",
+        "pluralName": "project-categories",
+        "displayName": "Project Category",
+        "description": "Categories for organizing portfolio projects"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "description": {
+          "type": "text"
+        },
+        "projects": {
+          "type": "relation",
+          "relation": "oneToMany",
+          "target": "api::project.project",
+          "mappedBy": "category"
+        }
+      }
+    },
+    "skill": {
+      "kind": "collectionType",
+      "collectionName": "skills",
+      "info": {
+        "singularName": "skill",
+        "pluralName": "skills",
+        "displayName": "Skill",
+        "description": "Professional skills with proficiency levels and categories"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "level": {
+          "type": "enumeration",
+          "enum": ["beginner", "intermediate", "advanced", "expert"],
+          "required": true
+        },
+        "category": {
+          "type": "enumeration",
+          "enum": ["frontend", "backend", "devops", "design", "other"]
+        },
+        "icon": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "order": {
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
+    "testimonial": {
+      "kind": "collectionType",
+      "collectionName": "testimonials",
+      "info": {
+        "singularName": "testimonial",
+        "pluralName": "testimonials",
+        "displayName": "Testimonial",
+        "description": "Client and colleague testimonials with ratings"
+      },
+      "options": {
+        "draftAndPublish": true
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "authorName": {
+          "type": "string",
+          "required": true
+        },
+        "authorRole": {
+          "type": "string"
+        },
+        "company": {
+          "type": "string"
+        },
+        "quote": {
+          "type": "text",
+          "required": true
+        },
+        "avatar": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "rating": {
+          "type": "integer",
+          "min": 1,
+          "max": 5
+        }
+      }
+    },
+    "homepage": {
+      "kind": "singleType",
+      "collectionName": "homepages",
+      "info": {
+        "singularName": "homepage",
+        "pluralName": "homepages",
+        "displayName": "Homepage",
+        "description": "The portfolio homepage with hero section and SEO"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "heroTitle": {
+          "type": "string",
+          "required": true
+        },
+        "heroSubtitle": {
+          "type": "text"
+        },
+        "introText": {
+          "type": "richtext"
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "about": {
+      "kind": "singleType",
+      "collectionName": "abouts",
+      "info": {
+        "singularName": "about",
+        "pluralName": "abouts",
+        "displayName": "About",
+        "description": "The about page with bio, avatar, and social links"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "bio": {
+          "type": "richtext"
+        },
+        "avatar": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "resumeFile": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["files"]
+        },
+        "socialLinks": {
+          "type": "component",
+          "component": "shared.social-link",
+          "repeatable": true
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "contact": {
+      "kind": "singleType",
+      "collectionName": "contacts",
+      "info": {
+        "singularName": "contact",
+        "pluralName": "contacts",
+        "displayName": "Contact",
+        "description": "The contact page with email, phone, address, and social links"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "text"
+        },
+        "email": {
+          "type": "email",
+          "required": true
+        },
+        "phone": {
+          "type": "string"
+        },
+        "address": {
+          "type": "text"
+        },
+        "socialLinks": {
+          "type": "component",
+          "component": "shared.social-link",
+          "repeatable": true
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "global": {
+      "kind": "singleType",
+      "collectionName": "globals",
+      "info": {
+        "singularName": "global",
+        "pluralName": "globals",
+        "displayName": "Global",
+        "description": "Global site settings including site name, description, and default SEO"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "siteName": {
+          "type": "string",
+          "required": true
+        },
+        "siteDescription": {
+          "type": "text",
+          "required": true
+        },
+        "favicon": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "defaultSeo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    }
+  },
+  "components": {
+    "shared": {
+      "seo": {
+        "collectionName": "components_shared_seo",
+        "info": {
+          "displayName": "Seo",
+          "icon": "search",
+          "description": "SEO metadata for pages and content"
+        },
+        "options": {},
+        "attributes": {
+          "metaTitle": {
+            "type": "string",
+            "required": true
+          },
+          "metaDescription": {
+            "type": "text",
+            "required": true
+          },
+          "shareImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      },
+      "media": {
+        "collectionName": "components_shared_media",
+        "info": {
+          "displayName": "Media",
+          "icon": "photograph",
+          "description": "A single media file (image, video, or document)"
+        },
+        "options": {},
+        "attributes": {
+          "file": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images", "files", "videos"]
+          }
+        }
+      },
+      "rich-text": {
+        "collectionName": "components_shared_rich_texts",
+        "info": {
+          "displayName": "Rich text",
+          "icon": "pencil-alt",
+          "description": "A rich text block for long-form content"
+        },
+        "options": {},
+        "attributes": {
+          "body": {
+            "type": "richtext"
+          }
+        }
+      },
+      "social-link": {
+        "collectionName": "components_shared_social_links",
+        "info": {
+          "displayName": "Social link",
+          "icon": "link",
+          "description": "A social media platform link"
+        },
+        "options": {},
+        "attributes": {
+          "platform": {
+            "type": "enumeration",
+            "enum": ["github", "linkedin", "twitter", "dribbble", "behance", "website"]
+          },
+          "url": {
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    },
+    "portfolio": {
+      "technology-tag": {
+        "collectionName": "components_portfolio_technology_tags",
+        "info": {
+          "displayName": "Technology tag",
+          "icon": "code",
+          "description": "A technology or tool tag for projects"
+        },
+        "options": {},
+        "attributes": {
+          "name": {
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    }
+  },
+  "middlewares": {
+    "project": {
+      "populate": {
+        "coverImage": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "gallery": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "category": {
+          "fields": ["name", "slug"]
+        },
+        "technologies": {
+          "populate": "*"
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "testimonial": {
+      "populate": {
+        "avatar": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        }
+      }
+    },
+    "about": {
+      "populate": {
+        "avatar": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "resumeFile": {
+          "fields": ["name", "url"]
+        },
+        "socialLinks": {
+          "populate": "*"
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "homepage": {
+      "populate": {
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "contact": {
+      "populate": {
+        "socialLinks": {
+          "populate": "*"
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "global": {
+      "populate": {
+        "favicon": {
+          "fields": ["name", "alternativeText", "url"]
+        },
+        "defaultSeo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "seedData": {
+    "project-category": [
+      {
+        "name": "Web Development",
+        "slug": "web-development",
+        "description": "Full-stack web applications and websites built with modern frameworks and technologies."
+      },
+      {
+        "name": "Mobile Apps",
+        "slug": "mobile-apps",
+        "description": "Native and cross-platform mobile applications for iOS and Android."
+      },
+      {
+        "name": "UI/UX Design",
+        "slug": "ui-ux-design",
+        "description": "User interface and experience design projects focusing on usability and aesthetics."
+      }
+    ],
+    "project": [
+      {
+        "title": "E-Commerce Platform",
+        "slug": "e-commerce-platform",
+        "description": "A full-featured e-commerce platform with product management, shopping cart, and payment processing.",
+        "content": "## E-Commerce Platform\n\nThis project is a comprehensive e-commerce solution built from the ground up to provide a seamless shopping experience.\n\n### Features\n\n- **Product Catalog** with advanced filtering and search\n- **Shopping Cart** with real-time updates\n- **Secure Checkout** with multiple payment gateways\n- **Order Management** dashboard for administrators\n- **Responsive Design** optimized for all devices\n\n### Technical Highlights\n\nThe platform leverages server-side rendering for optimal performance and SEO. The backend API handles inventory management, user authentication, and order processing with robust error handling and validation.\n\n### Results\n\nThe platform successfully serves over 500 products and processes hundreds of orders daily with 99.9% uptime.",
+        "featured": true,
+        "projectUrl": "https://example.com/ecommerce-demo",
+        "repositoryUrl": "https://github.com/example/ecommerce-platform",
+        "technologies": [
+          { "name": "React" },
+          { "name": "Node.js" },
+          { "name": "PostgreSQL" },
+          { "name": "Stripe" }
+        ]
+      },
+      {
+        "title": "Task Management App",
+        "slug": "task-management-app",
+        "description": "A collaborative task management application with real-time updates and team workspace features.",
+        "content": "## Task Management App\n\nA modern project management tool designed for small to medium-sized teams who need an intuitive way to organize their work.\n\n### Features\n\n- **Kanban Boards** with drag-and-drop functionality\n- **Real-time Collaboration** powered by WebSockets\n- **Team Workspaces** with role-based permissions\n- **Timeline View** for project planning\n- **Integrations** with popular tools like Slack and GitHub\n\n### Technical Highlights\n\nBuilt with a reactive architecture to ensure instant updates across all connected clients. The application uses optimistic UI updates for a snappy user experience while maintaining data consistency through conflict resolution on the server side.\n\n### Results\n\nAdopted by multiple teams with positive feedback on the intuitive interface and real-time sync capabilities.",
+        "featured": true,
+        "projectUrl": "https://example.com/taskman-demo",
+        "repositoryUrl": "https://github.com/example/task-management",
+        "technologies": [
+          { "name": "Vue.js" },
+          { "name": "Express" },
+          { "name": "MongoDB" },
+          { "name": "Socket.io" }
+        ]
+      },
+      {
+        "title": "Fitness Tracker Mobile App",
+        "slug": "fitness-tracker-mobile-app",
+        "description": "A cross-platform mobile application for tracking workouts, nutrition, and health metrics.",
+        "content": "## Fitness Tracker Mobile App\n\nA comprehensive health and fitness companion app that helps users track their workouts, monitor nutrition, and achieve their wellness goals.\n\n### Features\n\n- **Workout Logging** with pre-built and custom routines\n- **Nutrition Tracking** with barcode scanning\n- **Progress Charts** for visualizing fitness trends\n- **Goal Setting** with milestone notifications\n- **Social Features** for sharing achievements\n\n### Technical Highlights\n\nDeveloped as a cross-platform application to reach both iOS and Android users from a single codebase. The app integrates with device health APIs to pull step counts, heart rate data, and sleep metrics. Offline-first architecture ensures the app works reliably without network connectivity.\n\n### Results\n\nOver 10,000 downloads in the first month with a 4.5-star average rating on app stores.",
+        "featured": false,
+        "projectUrl": "https://example.com/fitness-app",
+        "repositoryUrl": "https://github.com/example/fitness-tracker",
+        "technologies": [
+          { "name": "React Native" },
+          { "name": "TypeScript" },
+          { "name": "Firebase" }
+        ]
+      },
+      {
+        "title": "Brand Identity Redesign",
+        "slug": "brand-identity-redesign",
+        "description": "A complete brand identity redesign for a technology startup, including logo, typography, and design system.",
+        "content": "## Brand Identity Redesign\n\nA comprehensive rebranding project for a growing technology startup looking to establish a more professional and cohesive visual identity.\n\n### Deliverables\n\n- **Logo Design** with multiple variations and usage guidelines\n- **Color Palette** with primary, secondary, and accent colors\n- **Typography System** with heading and body font selections\n- **Component Library** built as a reusable design system\n- **Brand Guidelines** document for consistent application\n\n### Design Process\n\nThe project began with stakeholder interviews and competitor analysis to understand the brand positioning. Multiple concept directions were explored through mood boards before converging on the final direction. The design system was built iteratively with developer input to ensure feasibility.\n\n### Results\n\nThe new brand identity increased brand recognition by 40% and provided a scalable design system that reduced design-to-development handoff time by 60%.",
+        "featured": false,
+        "projectUrl": "https://example.com/brand-case-study",
+        "repositoryUrl": "",
+        "technologies": [
+          { "name": "Figma" },
+          { "name": "Illustrator" },
+          { "name": "Storybook" }
+        ]
+      }
+    ],
+    "skill": [
+      {
+        "name": "React",
+        "level": "expert",
+        "category": "frontend",
+        "order": 1
+      },
+      {
+        "name": "TypeScript",
+        "level": "advanced",
+        "category": "frontend",
+        "order": 2
+      },
+      {
+        "name": "Node.js",
+        "level": "advanced",
+        "category": "backend",
+        "order": 3
+      },
+      {
+        "name": "PostgreSQL",
+        "level": "intermediate",
+        "category": "backend",
+        "order": 4
+      },
+      {
+        "name": "Docker",
+        "level": "intermediate",
+        "category": "devops",
+        "order": 5
+      },
+      {
+        "name": "Figma",
+        "level": "advanced",
+        "category": "design",
+        "order": 6
+      }
+    ],
+    "testimonial": [
+      {
+        "authorName": "Sarah Chen",
+        "authorRole": "Product Manager",
+        "company": "TechCorp Inc.",
+        "quote": "Working with this developer was an outstanding experience. They delivered a complex e-commerce platform on time and exceeded our expectations in terms of performance and code quality. Their ability to translate business requirements into elegant technical solutions is remarkable.",
+        "rating": 5
+      },
+      {
+        "authorName": "Marcus Johnson",
+        "authorRole": "CTO",
+        "company": "StartupHub",
+        "quote": "An incredibly talented full-stack developer who brings both technical expertise and creative problem-solving to every project. The task management tool they built for our team has transformed how we work and collaborate daily.",
+        "rating": 5
+      },
+      {
+        "authorName": "Emily Rodriguez",
+        "authorRole": "Design Director",
+        "company": "Creative Studio",
+        "quote": "Their attention to detail in implementing our design system was impressive. They bridged the gap between design and development seamlessly, ensuring pixel-perfect results while maintaining excellent code architecture and accessibility standards.",
+        "rating": 4
+      }
+    ],
+    "homepage": [
+      {
+        "heroTitle": "Hi, I'm a Full-Stack Developer & Designer",
+        "heroSubtitle": "I build modern web applications and design intuitive user experiences. Passionate about clean code, creative solutions, and continuous learning.",
+        "introText": "## Welcome to My Portfolio\n\nI am a passionate developer and designer with over 5 years of experience building digital products. My work spans from full-stack web applications to mobile apps and brand identity design.\n\nI believe in writing clean, maintainable code and creating user experiences that are both beautiful and functional. Every project is an opportunity to solve real problems and make a meaningful impact.\n\n### What I Do\n\n- **Web Development** - Building responsive, performant web applications with modern frameworks\n- **Mobile Development** - Creating cross-platform mobile experiences\n- **UI/UX Design** - Designing intuitive interfaces backed by user research\n\nFeel free to explore my projects and get in touch if you would like to collaborate."
+      }
+    ],
+    "about": [
+      {
+        "title": "About Me",
+        "bio": "## My Journey\n\nI started my career as a self-taught developer, driven by curiosity and a desire to build things that matter. Over the past 5 years, I have worked with startups and established companies alike, helping them bring their digital visions to life.\n\n### Background\n\nMy journey into tech began with tinkering on small websites and gradually evolved into building complex, production-grade applications. I hold a degree in Computer Science and have continued to grow through hands-on project work, open-source contributions, and continuous learning.\n\n### Philosophy\n\nI believe the best software is built at the intersection of solid engineering and thoughtful design. I strive to write code that is not only functional but also readable, testable, and maintainable. Every line of code should serve a purpose.\n\n### Beyond Code\n\nWhen I am not coding, you can find me hiking, reading about emerging technologies, or contributing to open-source projects. I am also an avid photographer and enjoy capturing landscapes during my travels."
+      }
+    ],
+    "contact": [
+      {
+        "title": "Get in Touch",
+        "description": "I am always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Feel free to reach out through any of the channels below.",
+        "email": "hello@example.com",
+        "phone": "+1 (555) 123-4567",
+        "address": "San Francisco, CA, United States",
+        "socialLinks": [
+          {
+            "platform": "github",
+            "url": "https://github.com/example"
+          },
+          {
+            "platform": "linkedin",
+            "url": "https://linkedin.com/in/example"
+          },
+          {
+            "platform": "twitter",
+            "url": "https://twitter.com/example"
+          },
+          {
+            "platform": "dribbble",
+            "url": "https://dribbble.com/example"
+          }
+        ]
+      }
+    ],
+    "global": [
+      {
+        "siteName": "My Portfolio",
+        "siteDescription": "A personal portfolio showcasing projects, skills, and professional experience in web development, mobile apps, and UI/UX design."
+      }
+    ]
+  },
+  "publicPermissions": {
+    "project": ["find", "findOne"],
+    "project-category": ["find", "findOne"],
+    "skill": ["find", "findOne"],
+    "testimonial": ["find", "findOne"],
+    "homepage": ["find"],
+    "about": ["find"],
+    "contact": ["find"],
+    "global": ["find"]
+  }
+}

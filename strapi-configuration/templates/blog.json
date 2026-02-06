@@ -1,0 +1,581 @@
+{
+  "name": "blog",
+  "displayName": "Blog",
+  "description": "A full-featured blog with articles, authors, categories, tags, and configurable homepage, about, and global settings. Includes SEO components and rich content support.",
+  "contentTypes": {
+    "article": {
+      "kind": "collectionType",
+      "collectionName": "articles",
+      "info": {
+        "singularName": "article",
+        "pluralName": "articles",
+        "displayName": "Article",
+        "description": "Blog articles with rich content, authors, categories, and tags"
+      },
+      "options": {
+        "draftAndPublish": true
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "title"
+        },
+        "description": {
+          "type": "text",
+          "maxLength": 250
+        },
+        "content": {
+          "type": "richtext"
+        },
+        "cover": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "author": {
+          "type": "relation",
+          "relation": "manyToOne",
+          "target": "api::author.author",
+          "inversedBy": "articles"
+        },
+        "category": {
+          "type": "relation",
+          "relation": "manyToOne",
+          "target": "api::category.category",
+          "inversedBy": "articles"
+        },
+        "tags": {
+          "type": "relation",
+          "relation": "manyToMany",
+          "target": "api::tag.tag",
+          "inversedBy": "articles"
+        },
+        "seo": {
+          "type": "component",
+          "repeatable": false,
+          "component": "shared.seo"
+        }
+      }
+    },
+    "author": {
+      "kind": "collectionType",
+      "collectionName": "authors",
+      "info": {
+        "singularName": "author",
+        "pluralName": "authors",
+        "displayName": "Author",
+        "description": "Blog post authors"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "email": {
+          "type": "email"
+        },
+        "bio": {
+          "type": "text",
+          "maxLength": 500
+        },
+        "avatar": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "articles": {
+          "type": "relation",
+          "relation": "oneToMany",
+          "target": "api::article.article",
+          "mappedBy": "author"
+        }
+      }
+    },
+    "category": {
+      "kind": "collectionType",
+      "collectionName": "categories",
+      "info": {
+        "singularName": "category",
+        "pluralName": "categories",
+        "displayName": "Category",
+        "description": "Article categories for organizing blog content"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "description": {
+          "type": "text"
+        },
+        "articles": {
+          "type": "relation",
+          "relation": "oneToMany",
+          "target": "api::article.article",
+          "mappedBy": "category"
+        }
+      }
+    },
+    "tag": {
+      "kind": "collectionType",
+      "collectionName": "tags",
+      "info": {
+        "singularName": "tag",
+        "pluralName": "tags",
+        "displayName": "Tag",
+        "description": "Tags for cross-cutting article topics"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "articles": {
+          "type": "relation",
+          "relation": "manyToMany",
+          "target": "api::article.article",
+          "mappedBy": "tags"
+        }
+      }
+    },
+    "homepage": {
+      "kind": "singleType",
+      "collectionName": "homepages",
+      "info": {
+        "singularName": "homepage",
+        "pluralName": "homepages",
+        "displayName": "Homepage",
+        "description": "The blog homepage with hero section and SEO"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "text"
+        },
+        "hero": {
+          "type": "component",
+          "repeatable": false,
+          "component": "blog.hero-section"
+        },
+        "seo": {
+          "type": "component",
+          "repeatable": false,
+          "component": "shared.seo"
+        }
+      }
+    },
+    "about": {
+      "kind": "singleType",
+      "collectionName": "abouts",
+      "info": {
+        "singularName": "about",
+        "pluralName": "abouts",
+        "displayName": "About",
+        "description": "The about page with dynamic content blocks"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "content": {
+          "type": "richtext"
+        },
+        "blocks": {
+          "type": "dynamiczone",
+          "components": [
+            "shared.media",
+            "shared.rich-text",
+            "shared.quote"
+          ]
+        },
+        "seo": {
+          "type": "component",
+          "repeatable": false,
+          "component": "shared.seo"
+        }
+      }
+    },
+    "global": {
+      "kind": "singleType",
+      "collectionName": "globals",
+      "info": {
+        "singularName": "global",
+        "pluralName": "globals",
+        "displayName": "Global",
+        "description": "Global site settings including site name, description, and default SEO"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "siteName": {
+          "type": "string",
+          "required": true
+        },
+        "siteDescription": {
+          "type": "text",
+          "required": true
+        },
+        "favicon": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "defaultSeo": {
+          "type": "component",
+          "repeatable": false,
+          "component": "shared.seo"
+        }
+      }
+    }
+  },
+  "components": {
+    "shared": {
+      "seo": {
+        "collectionName": "components_shared_seo",
+        "info": {
+          "displayName": "Seo",
+          "icon": "search",
+          "description": "SEO metadata for pages and articles"
+        },
+        "options": {},
+        "attributes": {
+          "metaTitle": {
+            "type": "string",
+            "required": true
+          },
+          "metaDescription": {
+            "type": "text",
+            "required": true
+          },
+          "shareImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      },
+      "media": {
+        "collectionName": "components_shared_media",
+        "info": {
+          "displayName": "Media",
+          "icon": "photograph",
+          "description": "A single media file (image, video, or document)"
+        },
+        "options": {},
+        "attributes": {
+          "file": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images", "files", "videos"]
+          }
+        }
+      },
+      "rich-text": {
+        "collectionName": "components_shared_rich_texts",
+        "info": {
+          "displayName": "Rich text",
+          "icon": "pencil-alt",
+          "description": "A rich text block for long-form content"
+        },
+        "options": {},
+        "attributes": {
+          "body": {
+            "type": "richtext"
+          }
+        }
+      },
+      "quote": {
+        "collectionName": "components_shared_quotes",
+        "info": {
+          "displayName": "Quote",
+          "icon": "chat-alt-2",
+          "description": "A quotation block with attribution"
+        },
+        "options": {},
+        "attributes": {
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "text"
+          },
+          "author": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "blog": {
+      "hero-section": {
+        "collectionName": "components_blog_hero_sections",
+        "info": {
+          "displayName": "Hero section",
+          "icon": "star",
+          "description": "Hero banner section with title, subtitle, and background image"
+        },
+        "options": {},
+        "attributes": {
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "text"
+          },
+          "backgroundImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      }
+    }
+  },
+  "middlewares": {
+    "article": {
+      "populate": {
+        "cover": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "author": {
+          "fields": ["name", "bio"],
+          "populate": {
+            "avatar": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "category": {
+          "fields": ["name", "slug"]
+        },
+        "tags": {
+          "fields": ["name", "slug"]
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "homepage": {
+      "populate": {
+        "hero": {
+          "populate": {
+            "backgroundImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "about": {
+      "populate": {
+        "blocks": {
+          "populate": "*"
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "global": {
+      "populate": {
+        "favicon": {
+          "fields": ["name", "alternativeText", "url"]
+        },
+        "defaultSeo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "seedData": {
+    "_note": "Seed data includes only text-based fields. Media fields and relation fields are omitted because media requires file uploads and relations require a two-pass approach (create entries first, then link them via the admin panel or a custom seed script).",
+    "category": [
+      {
+        "name": "Technology",
+        "slug": "technology",
+        "description": "Articles about software development, emerging tech trends, and digital innovation."
+      },
+      {
+        "name": "Lifestyle",
+        "slug": "lifestyle",
+        "description": "Tips and stories about productivity, wellness, and everyday life."
+      },
+      {
+        "name": "Travel",
+        "slug": "travel",
+        "description": "Destination guides, travel tips, and stories from around the world."
+      }
+    ],
+    "tag": [
+      {
+        "name": "Getting Started",
+        "slug": "getting-started"
+      },
+      {
+        "name": "Tips & Tricks",
+        "slug": "tips-and-tricks"
+      },
+      {
+        "name": "Deep Dive",
+        "slug": "deep-dive"
+      }
+    ],
+    "author": [
+      {
+        "name": "Sarah Chen",
+        "email": "sarah.chen@example.com",
+        "bio": "Full-stack developer and open-source enthusiast. Sarah writes about web technologies, developer tools, and the future of software engineering. When she's not coding, you'll find her hiking Pacific Northwest trails."
+      },
+      {
+        "name": "Marcus Rivera",
+        "email": "marcus.rivera@example.com",
+        "bio": "Travel writer and photographer with a passion for uncovering hidden gems. Marcus has visited over 40 countries and believes every journey starts with a good story. He covers travel, culture, and lifestyle topics."
+      }
+    ],
+    "article": [
+      {
+        "title": "Getting Started with Strapi: A Beginner's Guide",
+        "slug": "getting-started-with-strapi",
+        "description": "Learn how to set up your first Strapi project, create content types, and build a REST API in minutes.",
+        "content": "## Introduction\n\nStrapi is the leading open-source headless CMS. It's built with JavaScript, fully customizable, and developer-first.\n\n## Why Strapi?\n\nTraditional CMS platforms couple the frontend and backend together. Strapi takes a different approach by providing a powerful API layer that lets you deliver content to any frontend framework or device.\n\n### Key Benefits\n\n- **Open Source**: Full control over your code and data\n- **Customizable**: Extend and modify anything through plugins and custom code\n- **RESTful & GraphQL**: Choose the API format that works best for your project\n- **Self-hosted**: Deploy anywhere you want\n\n## Setting Up Your First Project\n\nCreating a new Strapi project is straightforward:\n\n```bash\nnpx create-strapi-app my-blog --quickstart\n```\n\nThis command scaffolds a complete Strapi application with a SQLite database, perfect for development.\n\n## Creating Your First Content Type\n\nOnce the admin panel is running, navigate to the **Content-Type Builder** and create a new collection type. Define your fields, set permissions, and start creating content immediately.\n\n## What's Next?\n\nIn the next article, we'll explore advanced features like custom controllers, middleware, and deploying Strapi to production.",
+        "seo": {
+          "metaTitle": "Getting Started with Strapi - A Beginner's Guide",
+          "metaDescription": "A comprehensive beginner's guide to setting up Strapi, creating content types, and building your first headless CMS project."
+        }
+      },
+      {
+        "title": "10 Productivity Tips for Remote Developers",
+        "slug": "productivity-tips-remote-developers",
+        "description": "Practical strategies to stay focused, organized, and productive while working from home as a software developer.",
+        "content": "## The Remote Work Challenge\n\nWorking from home offers incredible flexibility, but it also comes with unique challenges. Distractions, isolation, and blurred work-life boundaries can all take a toll on your productivity.\n\nHere are ten battle-tested tips that have helped me thrive as a remote developer.\n\n## 1. Establish a Morning Routine\n\nStart each day the same way. Whether it's a cup of coffee, a short walk, or 15 minutes of reading, a consistent routine signals to your brain that it's time to work.\n\n## 2. Dedicate a Workspace\n\nEven if you don't have a home office, carve out a specific area for work. Your brain will associate that space with focus and productivity.\n\n## 3. Time-Block Your Calendar\n\nGroup similar tasks together and protect deep work blocks from meetings and interruptions.\n\n## 4. Take Real Breaks\n\nStep away from the screen. Go outside. The Pomodoro technique (25 minutes of work, 5 minutes of rest) is a great starting point.\n\n## 5. Communicate Proactively\n\nOver-communicate rather than under-communicate. Share status updates, ask questions early, and be responsive during core hours.\n\n## 6. Invest in Good Equipment\n\nA quality monitor, keyboard, and chair make a measurable difference in your comfort and output.\n\n## 7. Automate Repetitive Tasks\n\nUse scripts, aliases, and CI/CD pipelines to eliminate manual toil.\n\n## 8. Set Boundaries\n\nDefine clear start and end times for your workday. Close the laptop and walk away.\n\n## 9. Stay Connected\n\nJoin virtual co-working sessions, participate in community Slack channels, and schedule regular one-on-ones with colleagues.\n\n## 10. Reflect Weekly\n\nSpend 15 minutes each Friday reviewing what went well, what didn't, and what you'll change next week.\n\n## Conclusion\n\nRemote work is a skill. Like any skill, it improves with deliberate practice and honest self-assessment.",
+        "seo": {
+          "metaTitle": "10 Productivity Tips for Remote Developers",
+          "metaDescription": "Discover practical strategies for staying focused, organized, and productive while working remotely as a software developer."
+        }
+      },
+      {
+        "title": "Exploring the Hidden Beaches of Portugal's Algarve Coast",
+        "slug": "hidden-beaches-portugal-algarve",
+        "description": "A guide to the lesser-known coves, sea caves, and pristine beaches along southern Portugal's stunning coastline.",
+        "content": "## Why the Algarve?\n\nPortugal's Algarve region is famous for its dramatic limestone cliffs, golden sand beaches, and crystal-clear waters. While spots like Praia da Marinha draw crowds, there are dozens of quieter beaches waiting to be discovered.\n\n## Praia da Mesquita\n\nTucked between towering cliffs near Carvoeiro, this small beach is accessible only by a steep trail or by kayak. The effort is rewarded with near-solitude and stunning rock formations.\n\n## Praia do Submarino\n\nNamed after a submarine-shaped rock formation visible at low tide, this beach near Portimao is often overlooked by tourists heading to the more famous Praia da Rocha nearby.\n\n## The Sea Caves of Benagil\n\nWhile the main Benagil cave is well-known, the surrounding coastline hides numerous smaller caves accessible by paddleboard or kayak. Early morning trips (before 9 AM) offer the best light and fewest crowds.\n\n## Getting Around\n\nRenting a car is the best way to explore the Algarve's hidden beaches. Many are accessible only via unpaved roads or coastal paths that aren't served by public transport.\n\n### What to Bring\n\n- **Water and snacks**: Many hidden beaches have no facilities\n- **Sun protection**: The Algarve sun is strong, even in shoulder season\n- **Water shoes**: Rocky entries are common at secluded coves\n- **A dry bag**: Essential if you're kayaking to beaches\n\n## Best Time to Visit\n\nMay through June and September through October offer warm weather, smaller crowds, and lower prices. July and August are peak season with temperatures regularly exceeding 35C.\n\n## Final Thoughts\n\nThe Algarve rewards curiosity. Wander off the main roads, talk to locals, and don't be afraid to take that unmarked trail down to the water. The best beach is always the one you discover yourself.",
+        "seo": {
+          "metaTitle": "Hidden Beaches of Portugal's Algarve Coast",
+          "metaDescription": "Discover the lesser-known coves, sea caves, and pristine beaches along Portugal's stunning Algarve coastline with this insider's guide."
+        }
+      }
+    ],
+    "homepage": [
+      {
+        "title": "Welcome to Our Blog",
+        "description": "Explore articles on technology, lifestyle, and travel written by passionate creators.",
+        "hero": {
+          "title": "Stories Worth Reading",
+          "subtitle": "Thoughtful articles on technology, lifestyle, and travel from writers who care about their craft."
+        },
+        "seo": {
+          "metaTitle": "Our Blog - Stories Worth Reading",
+          "metaDescription": "Explore thoughtful articles on technology, lifestyle, and travel from passionate writers and creators."
+        }
+      }
+    ],
+    "about": [
+      {
+        "title": "About Us",
+        "content": "## Our Story\n\nWe started this blog with a simple idea: share what we know, learn from our readers, and build a community around curiosity and craft.\n\nOur writers come from diverse backgrounds - software engineering, travel journalism, photography, and more - but we all share a commitment to creating content that's genuinely useful and thoughtfully written.",
+        "blocks": [
+          {
+            "__component": "shared.rich-text",
+            "body": "## Our Mission\n\nWe believe that great content should be accessible to everyone. Our articles are free, ad-light, and written with care. We focus on depth over clickbait and substance over hype.\n\n## Our Team\n\nOur writers are practitioners first and writers second. When Sarah writes about Strapi, she's drawing on years of real-world experience. When Marcus writes about the Algarve, he's been there with sand between his toes."
+          },
+          {
+            "__component": "shared.quote",
+            "title": "Why We Write",
+            "body": "The best way to learn something deeply is to explain it clearly to someone else. Writing forces clarity of thought, and sharing that writing builds connections that make the work worthwhile.",
+            "author": "Sarah Chen, Co-founder"
+          }
+        ],
+        "seo": {
+          "metaTitle": "About Us - Our Blog",
+          "metaDescription": "Learn about our team, our mission, and why we write. We're a community of creators sharing knowledge on technology, lifestyle, and travel."
+        }
+      }
+    ],
+    "global": [
+      {
+        "siteName": "My Blog",
+        "siteDescription": "A modern blog covering technology, lifestyle, and travel. Built with Strapi and powered by great content.",
+        "defaultSeo": {
+          "metaTitle": "My Blog - Technology, Lifestyle & Travel",
+          "metaDescription": "A modern blog featuring in-depth articles on technology, lifestyle, and travel. Discover stories worth reading from passionate writers."
+        }
+      }
+    ]
+  },
+  "publicPermissions": {
+    "article": ["find", "findOne"],
+    "author": ["find", "findOne"],
+    "category": ["find", "findOne"],
+    "tag": ["find", "findOne"],
+    "homepage": ["find"],
+    "about": ["find"],
+    "global": ["find"]
+  }
+}

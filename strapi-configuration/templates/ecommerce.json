@@ -1,0 +1,663 @@
+{
+  "name": "ecommerce",
+  "displayName": "E-commerce",
+  "description": "A complete e-commerce starter template with products, categories, reviews, and storefront pages. Includes SEO components, product features, hero banners, and pre-configured API middleware for optimized data fetching.",
+  "contentTypes": {
+    "product": {
+      "kind": "collectionType",
+      "collectionName": "products",
+      "info": {
+        "singularName": "product",
+        "pluralName": "products",
+        "displayName": "Product",
+        "description": "E-commerce products with pricing, inventory, and rich descriptions"
+      },
+      "options": {
+        "draftAndPublish": true
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "description": {
+          "type": "richtext"
+        },
+        "shortDescription": {
+          "type": "text",
+          "maxLength": 300
+        },
+        "price": {
+          "type": "decimal",
+          "required": true
+        },
+        "compareAtPrice": {
+          "type": "decimal"
+        },
+        "sku": {
+          "type": "string",
+          "unique": true
+        },
+        "inStock": {
+          "type": "boolean",
+          "default": true
+        },
+        "images": {
+          "type": "media",
+          "multiple": true,
+          "allowedTypes": ["images"]
+        },
+        "category": {
+          "type": "relation",
+          "relation": "manyToOne",
+          "target": "api::category.category",
+          "inversedBy": "products"
+        },
+        "reviews": {
+          "type": "relation",
+          "relation": "oneToMany",
+          "target": "api::review.review",
+          "mappedBy": "product"
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        },
+        "features": {
+          "type": "component",
+          "component": "ecommerce.product-feature",
+          "repeatable": true
+        }
+      }
+    },
+    "category": {
+      "kind": "collectionType",
+      "collectionName": "categories",
+      "info": {
+        "singularName": "category",
+        "pluralName": "categories",
+        "displayName": "Category",
+        "description": "Product categories for organizing the store catalog"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "slug": {
+          "type": "uid",
+          "targetField": "name"
+        },
+        "description": {
+          "type": "text"
+        },
+        "image": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "products": {
+          "type": "relation",
+          "relation": "oneToMany",
+          "target": "api::product.product",
+          "mappedBy": "category"
+        }
+      }
+    },
+    "review": {
+      "kind": "collectionType",
+      "collectionName": "reviews",
+      "info": {
+        "singularName": "review",
+        "pluralName": "reviews",
+        "displayName": "Review",
+        "description": "Customer reviews and ratings for products"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "rating": {
+          "type": "integer",
+          "required": true,
+          "min": 1,
+          "max": 5
+        },
+        "comment": {
+          "type": "text",
+          "required": true
+        },
+        "authorName": {
+          "type": "string",
+          "required": true
+        },
+        "authorEmail": {
+          "type": "email"
+        },
+        "product": {
+          "type": "relation",
+          "relation": "manyToOne",
+          "target": "api::product.product",
+          "inversedBy": "reviews"
+        }
+      }
+    },
+    "homepage": {
+      "kind": "singleType",
+      "collectionName": "homepages",
+      "info": {
+        "singularName": "homepage",
+        "pluralName": "homepages",
+        "displayName": "Homepage",
+        "description": "The store homepage with hero banner and featured sections"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "subtitle": {
+          "type": "text"
+        },
+        "heroBanner": {
+          "type": "component",
+          "component": "ecommerce.hero-banner",
+          "repeatable": false
+        },
+        "featuredSection": {
+          "type": "component",
+          "component": "ecommerce.featured-section",
+          "repeatable": false
+        },
+        "seo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        }
+      }
+    },
+    "global": {
+      "kind": "singleType",
+      "collectionName": "globals",
+      "info": {
+        "singularName": "global",
+        "pluralName": "globals",
+        "displayName": "Global",
+        "description": "Global store settings including store name, description, and default SEO"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "pluginOptions": {},
+      "attributes": {
+        "storeName": {
+          "type": "string",
+          "required": true
+        },
+        "storeDescription": {
+          "type": "text",
+          "required": true
+        },
+        "logo": {
+          "type": "media",
+          "multiple": false,
+          "allowedTypes": ["images"]
+        },
+        "defaultSeo": {
+          "type": "component",
+          "component": "shared.seo",
+          "repeatable": false
+        },
+        "socialLinks": {
+          "type": "component",
+          "component": "shared.social-link",
+          "repeatable": true
+        }
+      }
+    }
+  },
+  "components": {
+    "shared": {
+      "seo": {
+        "collectionName": "components_shared_seo",
+        "info": {
+          "displayName": "Seo",
+          "icon": "search",
+          "description": "SEO metadata for pages and products"
+        },
+        "options": {},
+        "attributes": {
+          "metaTitle": {
+            "type": "string",
+            "required": true
+          },
+          "metaDescription": {
+            "type": "text",
+            "required": true
+          },
+          "shareImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      },
+      "media": {
+        "collectionName": "components_shared_media",
+        "info": {
+          "displayName": "Media",
+          "icon": "photograph",
+          "description": "A single media file (image, video, or document)"
+        },
+        "options": {},
+        "attributes": {
+          "file": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images", "files", "videos"]
+          }
+        }
+      },
+      "rich-text": {
+        "collectionName": "components_shared_rich_texts",
+        "info": {
+          "displayName": "Rich text",
+          "icon": "pencil-alt",
+          "description": "A rich text block for long-form content"
+        },
+        "options": {},
+        "attributes": {
+          "body": {
+            "type": "richtext"
+          }
+        }
+      },
+      "social-link": {
+        "collectionName": "components_shared_social_links",
+        "info": {
+          "displayName": "Social link",
+          "icon": "link",
+          "description": "A social media platform link"
+        },
+        "options": {},
+        "attributes": {
+          "platform": {
+            "type": "enumeration",
+            "enum": ["facebook", "twitter", "instagram", "linkedin", "youtube", "tiktok"]
+          },
+          "url": {
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    },
+    "ecommerce": {
+      "product-feature": {
+        "collectionName": "components_ecommerce_product_features",
+        "info": {
+          "displayName": "Product feature",
+          "icon": "star",
+          "description": "A product feature highlight with title and description"
+        },
+        "options": {},
+        "attributes": {
+          "title": {
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "type": "text"
+          }
+        }
+      },
+      "hero-banner": {
+        "collectionName": "components_ecommerce_hero_banners",
+        "info": {
+          "displayName": "Hero banner",
+          "icon": "picture",
+          "description": "Hero banner with title, subtitle, call-to-action, and background image"
+        },
+        "options": {},
+        "attributes": {
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "text"
+          },
+          "ctaText": {
+            "type": "string"
+          },
+          "ctaLink": {
+            "type": "string"
+          },
+          "backgroundImage": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": ["images"]
+          }
+        }
+      },
+      "featured-section": {
+        "collectionName": "components_ecommerce_featured_sections",
+        "info": {
+          "displayName": "Featured section",
+          "icon": "grid",
+          "description": "A featured content section with title and description"
+        },
+        "options": {},
+        "attributes": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  },
+  "middlewares": {
+    "product": {
+      "populate": {
+        "images": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "category": {
+          "fields": ["name", "slug"]
+        },
+        "reviews": {
+          "fields": ["rating", "comment", "authorName"]
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "features": {
+          "populate": "*"
+        }
+      }
+    },
+    "category": {
+      "populate": {
+        "image": {
+          "fields": ["name", "alternativeText", "url", "formats"]
+        },
+        "products": {
+          "fields": ["name", "slug", "price", "shortDescription"]
+        }
+      }
+    },
+    "homepage": {
+      "populate": {
+        "heroBanner": {
+          "populate": {
+            "backgroundImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "featuredSection": {
+          "populate": "*"
+        },
+        "seo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        }
+      }
+    },
+    "global": {
+      "populate": {
+        "logo": {
+          "fields": ["name", "alternativeText", "url"]
+        },
+        "defaultSeo": {
+          "populate": {
+            "shareImage": {
+              "fields": ["name", "alternativeText", "url", "formats"]
+            }
+          }
+        },
+        "socialLinks": {
+          "populate": "*"
+        }
+      }
+    }
+  },
+  "seedData": {
+    "category": [
+      {
+        "name": "Electronics",
+        "slug": "electronics",
+        "description": "Discover the latest in consumer electronics, from smart devices and wearables to audio equipment and accessories."
+      },
+      {
+        "name": "Clothing",
+        "slug": "clothing",
+        "description": "Browse our curated collection of stylish and comfortable clothing for every occasion, from casual wear to formal attire."
+      },
+      {
+        "name": "Home & Garden",
+        "slug": "home-garden",
+        "description": "Transform your living space with our selection of home decor, furniture, kitchen essentials, and garden supplies."
+      }
+    ],
+    "product": [
+      {
+        "name": "Wireless Noise-Cancelling Headphones",
+        "slug": "wireless-noise-cancelling-headphones",
+        "description": "## Premium Sound Experience\n\nImmerse yourself in crystal-clear audio with our flagship wireless headphones. Featuring advanced active noise cancellation technology, these headphones block out ambient noise so you can focus on what matters most -- your music.\n\n### Key Highlights\n- 40mm custom drivers for rich, detailed sound\n- Up to 30 hours of battery life on a single charge\n- Comfortable memory foam ear cushions\n- Foldable design for easy portability\n- Bluetooth 5.2 with multipoint connection",
+        "shortDescription": "Premium wireless headphones with active noise cancellation, 30-hour battery life, and ultra-comfortable memory foam ear cushions for all-day listening.",
+        "price": 249.99,
+        "compareAtPrice": 349.99,
+        "sku": "ELEC-WH-001",
+        "inStock": true,
+        "features": [
+          {
+            "title": "Active Noise Cancellation",
+            "description": "Advanced ANC technology adapts to your environment, blocking up to 98% of ambient noise for a truly immersive listening experience."
+          },
+          {
+            "title": "30-Hour Battery Life",
+            "description": "Listen all day and into the night. Quick charge provides 5 hours of playback from just 10 minutes of charging."
+          },
+          {
+            "title": "Multipoint Connection",
+            "description": "Seamlessly switch between two connected devices without the hassle of re-pairing."
+          }
+        ]
+      },
+      {
+        "name": "Organic Cotton Classic T-Shirt",
+        "slug": "organic-cotton-classic-tshirt",
+        "description": "## Everyday Essential\n\nCrafted from 100% certified organic cotton, this classic-fit t-shirt combines sustainability with everyday comfort. The soft, breathable fabric feels gentle against the skin and holds its shape wash after wash.\n\n### Details\n- Pre-shrunk organic cotton\n- Reinforced shoulder seams\n- Tagless comfort label\n- Available in 12 colors",
+        "shortDescription": "A timeless classic-fit tee made from 100% certified organic cotton. Soft, breathable, and sustainably produced for everyday comfort.",
+        "price": 34.95,
+        "compareAtPrice": null,
+        "sku": "CLTH-TS-001",
+        "inStock": true,
+        "features": [
+          {
+            "title": "100% Organic Cotton",
+            "description": "Grown without synthetic pesticides or fertilizers, certified to GOTS standards for environmental and social responsibility."
+          },
+          {
+            "title": "Pre-Shrunk Fabric",
+            "description": "Garment-washed to minimize shrinkage so your shirt maintains its perfect fit after every wash."
+          }
+        ]
+      },
+      {
+        "name": "Smart Home Security Camera",
+        "slug": "smart-home-security-camera",
+        "description": "## Peace of Mind, Anytime\n\nKeep an eye on your home from anywhere in the world with our smart security camera. Featuring 2K resolution, night vision, and intelligent motion detection, this camera delivers reliable home monitoring around the clock.\n\n### What's Included\n- Security camera unit\n- Magnetic mounting bracket\n- USB-C power cable and adapter\n- Quick start guide",
+        "shortDescription": "2K resolution smart security camera with night vision, two-way audio, and AI-powered motion detection. Monitor your home from anywhere.",
+        "price": 129.00,
+        "compareAtPrice": 179.00,
+        "sku": "ELEC-SC-002",
+        "inStock": true,
+        "features": [
+          {
+            "title": "2K Ultra-Clear Video",
+            "description": "Capture every detail in stunning 2K resolution with a wide 130-degree field of view."
+          },
+          {
+            "title": "AI Motion Detection",
+            "description": "Intelligent algorithms distinguish between people, pets, and vehicles to reduce false alerts and notify you of what truly matters."
+          },
+          {
+            "title": "Two-Way Audio",
+            "description": "Built-in speaker and microphone let you communicate with visitors or deter intruders directly from your phone."
+          }
+        ]
+      },
+      {
+        "name": "Handcrafted Ceramic Planter Set",
+        "slug": "handcrafted-ceramic-planter-set",
+        "description": "## Bring Nature Indoors\n\nElevate your indoor garden with this set of three handcrafted ceramic planters. Each piece is individually shaped and glazed by skilled artisans, making every set truly unique. The minimalist design complements any interior style.\n\n### Set Includes\n- Small planter (4 inch diameter)\n- Medium planter (6 inch diameter)\n- Large planter (8 inch diameter)\n- Matching bamboo saucers for each size",
+        "shortDescription": "Set of three handcrafted ceramic planters with bamboo saucers. Each piece is uniquely shaped and glazed by skilled artisans.",
+        "price": 64.50,
+        "compareAtPrice": 85.00,
+        "sku": "HOME-PL-001",
+        "inStock": true,
+        "features": [
+          {
+            "title": "Handcrafted Quality",
+            "description": "Each planter is individually wheel-thrown and hand-glazed, ensuring subtle variations that make your set one of a kind."
+          },
+          {
+            "title": "Drainage System",
+            "description": "Built-in drainage holes paired with bamboo saucers protect your surfaces while keeping your plants healthy."
+          }
+        ]
+      },
+      {
+        "name": "Merino Wool Quarter-Zip Pullover",
+        "slug": "merino-wool-quarter-zip-pullover",
+        "description": "## Versatile Layering Piece\n\nThis quarter-zip pullover is knit from ultrafine 18.5-micron merino wool, offering exceptional softness without the itch. Naturally temperature-regulating and odor-resistant, it transitions effortlessly from the office to the trail.\n\n### Care Instructions\n- Machine washable on gentle cycle\n- Lay flat to dry\n- Do not bleach or tumble dry",
+        "shortDescription": "Ultrafine merino wool quarter-zip pullover that is naturally temperature-regulating, odor-resistant, and machine washable.",
+        "price": 119.00,
+        "compareAtPrice": 145.00,
+        "sku": "CLTH-QZ-002",
+        "inStock": false,
+        "features": [
+          {
+            "title": "18.5-Micron Merino Wool",
+            "description": "Ultrafine fibers provide a luxuriously soft hand feel that rivals cashmere, without any of the itchiness associated with traditional wool."
+          },
+          {
+            "title": "Temperature Regulation",
+            "description": "Merino wool naturally regulates body temperature, keeping you comfortable in both warm and cool conditions."
+          },
+          {
+            "title": "Odor Resistant",
+            "description": "The natural antimicrobial properties of merino wool resist odor buildup, so you can wear it multiple times between washes."
+          }
+        ]
+      }
+    ],
+    "review": [
+      {
+        "rating": 5,
+        "comment": "These headphones are absolutely incredible. The noise cancellation is on another level -- I can't hear a thing when they're on. Battery life easily lasts my entire work week. Best audio purchase I've ever made.",
+        "authorName": "Sarah Mitchell",
+        "authorEmail": "sarah.m@example.com"
+      },
+      {
+        "rating": 4,
+        "comment": "Really solid headphones for the price. Sound quality is excellent and the comfort is great for long listening sessions. Took one star off because the carrying case feels a bit cheap compared to the headphones themselves.",
+        "authorName": "James Chen",
+        "authorEmail": "j.chen@example.com"
+      },
+      {
+        "rating": 5,
+        "comment": "The ceramic planters are gorgeous in person. The photos don't do justice to the quality of the glaze work. I bought a second set for my sister and she loved them too.",
+        "authorName": "Maria Gonzalez",
+        "authorEmail": "maria.g@example.com"
+      },
+      {
+        "rating": 3,
+        "comment": "The security camera works well during the day but the night vision could be better in very dark conditions. The app is intuitive though, and setup only took about five minutes. Good value for the sale price.",
+        "authorName": "David Park",
+        "authorEmail": "d.park@example.com"
+      }
+    ],
+    "homepage": [
+      {
+        "title": "Welcome to Our Store",
+        "subtitle": "Discover handpicked products crafted for quality, comfort, and style. From cutting-edge electronics to sustainable fashion and artisan home goods.",
+        "heroBanner": {
+          "title": "Summer Collection 2025",
+          "subtitle": "Up to 40% off on selected items. Refresh your wardrobe and your home with our latest arrivals.",
+          "ctaText": "Shop Now",
+          "ctaLink": "/products"
+        },
+        "featuredSection": {
+          "title": "Staff Picks",
+          "description": "Our team's hand-selected favorites this season. These top-rated products combine exceptional quality with outstanding value."
+        },
+        "seo": {
+          "metaTitle": "Our Store - Quality Products for Every Lifestyle",
+          "metaDescription": "Shop our curated collection of electronics, clothing, and home goods. Discover premium products at great prices with free shipping on orders over $50."
+        }
+      }
+    ],
+    "global": [
+      {
+        "storeName": "My Strapi Store",
+        "storeDescription": "A modern e-commerce storefront powered by Strapi. We offer a curated selection of electronics, clothing, and home goods, all chosen for their quality, sustainability, and value.",
+        "defaultSeo": {
+          "metaTitle": "My Strapi Store - Shop Quality Products Online",
+          "metaDescription": "Browse our collection of premium electronics, sustainable clothing, and artisan home goods. Free shipping on orders over $50. Hassle-free returns within 30 days."
+        },
+        "socialLinks": [
+          {
+            "platform": "facebook",
+            "url": "https://facebook.com/mystrapistore"
+          },
+          {
+            "platform": "twitter",
+            "url": "https://twitter.com/mystrapistore"
+          },
+          {
+            "platform": "instagram",
+            "url": "https://instagram.com/mystrapistore"
+          },
+          {
+            "platform": "linkedin",
+            "url": "https://linkedin.com/company/mystrapistore"
+          }
+        ]
+      }
+    ]
+  },
+  "publicPermissions": {
+    "product": ["find", "findOne"],
+    "category": ["find", "findOne"],
+    "review": ["find", "findOne"],
+    "homepage": ["find"],
+    "global": ["find"]
+  }
+}
